@@ -103,12 +103,12 @@ box(galleryGroup,0,.38,0,4,.5,3,mat(0x24222b));box(galleryGroup,0,.66,0,4.15,.08
 for(const x of [-7.8,7.8])for(const z of [-8,0,8]){const col=box(galleryGroup,x,2.45,z,.24,4.9,.24,trim);col.material=mat(0x9c7945,.4,.55)}
 const files=selected==='rado'?radoFiles:arshaFiles,caps=selected==='rado'?radoCaps:arshaCaps,folder=selected==='rado'?'rado':'arsha';
 const loader=new THREE.TextureLoader();
-files.forEach((file,i)=>{const side=i%4, row=Math.floor(i/4),x=side===0?-8.9:side===1?8.9:(side===2?-5.4+row*3.6:5.4-row*3.6),z=side<2?-7.2+row*4.4:(side===2?-10.78:10.78),front=side===1||side===3;
-const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1)},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
+files.forEach((file,i)=>{const side=i%4,row=Math.floor(i/4),x=side===0?-8.55:side===1?8.55:(side===2?-5.4+row*3.6:5.4-row*3.6),z=side<2?-7.2+row*4.4:(side===2?-10.55:10.55);
 const frame=new THREE.Group();frame.position.set(x,2.65,z);if(side===0)frame.rotation.y=Math.PI/2;else if(side===1)frame.rotation.y=-Math.PI/2;else if(side===3)frame.rotation.y=Math.PI;galleryGroup.add(frame);
-const w=1.55,h=1.9;box(frame,0,0,-.06,w+.18,h+.18,.14,trim);box(frame,0,0,.025,w+.06,h+.06,.06,mat(0x08090d));
+const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
+box(frame,0,0,-.06,w+.2,h+.2,.14,trim);box(frame,0,0,.025,w+.08,h+.08,.06,mat(0x08090d));
 const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));image.position.z=.07;frame.add(image);
-const plaque=box(frame,0,-1.16,.02,1.65,.36,.08,makePlaque(`EXHIBIT ${String(i+1).padStart(2,'0')}`));plaque.userData.caption=caps[i];plaque.userData.image=`assets/${folder}/${file}`;plaque.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(plaque);
+const plaque=box(frame,0,-1.38,.02,1.95,.36,.08,makePlaque(`EXHIBIT ${String(i+1).padStart(2,'0')}`));plaque.userData.caption=caps[i];plaque.userData.image=imageUrl;plaque.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(plaque);
 });
 // exit portal sign
 const sign=box(galleryGroup,0,4.35,10.78,3,.55,.08,mat(0x151923));sign.material=makePlaque('EXIT · RETURN TO MUSEUMS');
