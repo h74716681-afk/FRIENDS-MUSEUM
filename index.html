@@ -53,27 +53,27 @@ import * as THREE from 'three';
 const radoFiles=['rado_01.jpg','rado_02.png','rado_03.png','rado_04.png','rado_05.png','rado_06.png','rado_07.jpg','rado_08.png','rado_09.jpg'];
 const arshaFiles=Array.from({length:10},(_,i)=>`arsha_${String(i+1).padStart(2,'0')}.jpg`);
 const radoCaps=[
-'The camera opened. Rado understood the assignment.',
-'Main character energy detected. Background characters not required.',
-'Proof that one photo can contain 47 different moods.',
-'The pose says “casual”; the confidence says “cover shoot”.',
-'An official entry in the Department of Looking Unbothered.',
-'No caption can compete with this level of camera awareness.',
-'Caught in 4K: another frame added to the legend.',
-'This picture has more attitude than the museum has walls.',
-'Exhibit note: the photographer was clearly working overtime.'
+'Rado entered the frame and the camera forgot its other plans.',
+'Warning: this level of attitude may cause mirror selfies nearby.',
+'One pose, seventeen retakes, and somehow this is the natural one.',
+'If confidence had a profile picture, this would be it.',
+'Rado.exe has stopped accepting boring-photo requests.',
+'The background is present only because the photo needed one.',
+'Breaking news: Rado caught being photogenic without prior notice.',
+'This pose has its own fan club and a waiting list.',
+'Museum staff confirmed: the camera asked for one more picture.'
 ];
 const arshaCaps=[
-'Five years of experience… and still the camera needs a second take.',
-'The legendary “Mujhe to 5 sal ka experience he” era.',
-'When the experience speaks, even the frame stands straight.',
-'Sir said “simple photo”. The pose filed a different report.',
-'Five years of experience, unlimited gallery presence.',
-'The expression says the lesson is about to begin.',
-'Attendance: present. Camera confidence: also present.',
-'An advanced practical in looking serious for no reason.',
-'The experience level is high; the caption writer is under pressure.',
-'Exhibit 10: proof that every museum needs a headliner.'
+'Sir has five years of experience; this frame has lifetime validity.',
+'Mujhe to 5 sal ka experience he — the camera has heard it too.',
+'Even the photo frame is standing straight in front of Sir.',
+'Sir asked for one simple photo; the pose submitted a full lecture.',
+'Experience: five years. Retakes: confidential information.',
+'That serious look means somebody is about to get homework.',
+'Camera attendance marked. Smile assignment still pending.',
+'Practical exam: look experienced. Sir passed before the timer started.',
+'The frame is silent, but it definitely calls him Sir.',
+'Final exhibit: proof that experience also knows how to pose.'
 ];
 const $=id=>document.getElementById(id);
 let selected='rado',active=false,near=null,photoOpen=false;
@@ -108,7 +108,7 @@ const frame=new THREE.Group();frame.position.set(x,2.65,z);if(side===0)frame.rot
 const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
 box(frame,0,0,-.06,w+.2,h+.2,.14,trim);box(frame,0,0,.025,w+.08,h+.08,.06,mat(0x08090d));
 const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));image.position.z=.07;frame.add(image);
-const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));plaque.userData.caption=caps[i];plaque.userData.image=imageUrl;plaque.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(plaque);
+const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(image);
 });
 // exit portal sign
 const sign=box(galleryGroup,0,4.35,10.78,3,.55,.08,mat(0x151923));sign.material=makePlaque('EXIT · RETURN TO MUSEUMS');
