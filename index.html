@@ -90,7 +90,7 @@ const ambient=new THREE.PointLight(0xd9b66f,1.2,30);ambient.position.set(0,4,0);
 let galleryGroup=new THREE.Group();scene.add(galleryGroup);
 const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 function box(parent,x,y,z,sx,sy,sz,material){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
-function makePlaque(text){const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='#191710';x.fillRect(0,0,512,128);x.strokeStyle='#c9a45f';x.lineWidth=5;x.strokeRect(5,5,502,118);x.fillStyle='#f3dfb6';x.font='24px Georgia';x.textAlign='center';x.fillText(text.slice(0,48),256,72);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:t})}
+function makePlaque(text){const c=document.createElement('canvas');c.width=512;c.height=160;const x=c.getContext('2d');x.fillStyle='#191710';x.fillRect(0,0,512,160);x.strokeStyle='#c9a45f';x.lineWidth=5;x.strokeRect(5,5,502,150);x.fillStyle='#f3dfb6';x.textAlign='center';x.font='22px Georgia';const words=text.split(' ');let lines=[''];for(const word of words){const n=(lines[lines.length-1]+' '+word).trim();if(x.measureText(n).width>460&&lines.length<2)lines.push(word);else lines[lines.length-1]=n}if(lines.length>2)lines[1]=lines[1].slice(0,35)+'…';x.fillText(lines[0],256,68);if(lines[1])x.fillText(lines[1],256,108);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:t})}
 let frames=[];
 function startMuseum(){active=true;photoOpen=false;galleryGroup.clear();frames=[];camera.position.set(0,1.65,8);yaw=0;pitch=0;camera.rotation.set(0,0,0);$('hud').style.display='flex';$('museumName').textContent=selected==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('hint').style.display='block';
 const wall=mat(selected==='rado'?0x29243a:0x2d2921),floor=mat(0x35343a,.45),ceiling=mat(0x171b26),trim=mat(0xb18b50,.32,.55);
@@ -108,7 +108,7 @@ const frame=new THREE.Group();frame.position.set(x,2.65,z);if(side===0)frame.rot
 const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
 box(frame,0,0,-.06,w+.2,h+.2,.14,trim);box(frame,0,0,.025,w+.08,h+.08,.06,mat(0x08090d));
 const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));image.position.z=.07;frame.add(image);
-const plaque=box(frame,0,-1.38,.02,1.95,.36,.08,makePlaque(`EXHIBIT ${String(i+1).padStart(2,'0')}`));plaque.userData.caption=caps[i];plaque.userData.image=imageUrl;plaque.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(plaque);
+const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));plaque.userData.caption=caps[i];plaque.userData.image=imageUrl;plaque.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(plaque);
 });
 // exit portal sign
 const sign=box(galleryGroup,0,4.35,10.78,3,.55,.08,mat(0x151923));sign.material=makePlaque('EXIT · RETURN TO MUSEUMS');
