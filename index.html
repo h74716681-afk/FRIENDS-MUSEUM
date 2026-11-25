@@ -44,7 +44,7 @@ button{border:1px solid var(--gold);background:linear-gradient(135deg,#b68b45,#7
 <button class="museum" onclick="choose('arsha')">ARSHA SIR MUSEUM<small>ENTER WITH SIR'S PASS</small></button>
 </div><p style="font-size:11px;margin-top:24px">3D WALKTHROUGH · TOUCH · KEYBOARD & MOUSE</p></div></div>
 <div id="lock" class="overlay" style="display:none"><div class="panel"><div class="kicker">Restricted gallery</div><h1 id="lockTitle">Museum pass</h1><p id="lockSub">Enter the museum's secret passphrase.</p><input id="pass" type="password" placeholder="Enter passphrase" autocomplete="off"><div id="error"></div><button onclick="unlock()">UNLOCK MUSEUM</button><button class="secondary" onclick="back()">BACK</button></div></div>
-<div id="hud"><span id="museumName">MUSEUM</span><span>WASD / JOYSTICK · E / TAP TO VIEW</span></div>
+<div id="hud"><span id="museumName">MUSEUM</span><span>WASD / JOYSTICK · E / VIEW NEARBY PHOTO</span></div>
 <div id="hint">Press E or tap INTERACT to view this photograph</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="actions"><button id="interact">VIEW</button><button id="run">RUN</button></div><div id="looklabel">DRAG RIGHT SIDE TO LOOK</div></div>
 <div id="photoModal" class="overlay"><div class="panel"><div class="kicker">Exhibition portrait</div><h1 id="photoTitle" style="font-size:30px">Photo</h1><img id="bigPhoto"><p id="caption"></p><button onclick="closePhoto()">BACK TO GALLERY</button></div></div>
@@ -128,7 +128,7 @@ renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId!==lookPoin
 function stopLook(e){if(e.pointerId===lookPointer)lookPointer=null}
 renderer.domElement.addEventListener('pointerup',stopLook);renderer.domElement.addEventListener('pointercancel',stopLook);
 $('interact').onclick=interact;$('run').onpointerdown=e=>{e.preventDefault();keys.shift=true};$('run').onpointerup=()=>keys.shift=false;$('run').onpointercancel=()=>keys.shift=false;
-const ray=new THREE.Raycaster();function findNear(){ray.setFromCamera(new THREE.Vector2(0,0),camera);const hits=ray.intersectObjects(frames,false);near=hits.length&&hits[0].distance<4?hits[0].object:null;$('hint').textContent=near?'Press E or tap VIEW to read this exhibit':'Explore the gallery · approach a frame to view';}
+function findNear(){let best=null,bestDistance=Infinity;for(const exhibit of frames){const p=new THREE.Vector3();exhibit.getWorldPosition(p);const d=camera.position.distanceTo(p);if(d<bestDistance){bestDistance=d;best=exhibit}}near=bestDistance<3.6?best:null;$('hint').textContent=near?'Nearby exhibit · press E or tap VIEW':'Explore the gallery · walk close to a photo to view';}
 function interact(){if(!active||photoOpen)return;findNear();if(near){photoOpen=true;$('photoTitle').textContent=near.userData.title;$('bigPhoto').src=near.userData.image;$('caption').textContent=near.userData.caption;$('photoModal').style.display='flex';if(document.pointerLockElement)document.exitPointerLock()}else if(camera.position.z>8.5){active=false;$('hud').style.display='none';$('hint').style.display='none';$('start').style.display='flex'}}
 window.closePhoto=()=>{$('photoModal').style.display='none';photoOpen=false};
 const clock=new THREE.Clock();
