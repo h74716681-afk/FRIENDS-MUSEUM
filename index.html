@@ -77,7 +77,7 @@ const arshaCaps=[
 ];
 const $=id=>document.getElementById(id);
 let selected='rado',active=false,near=null,photoOpen=false;
-window.choose=(who)=>{selected=who;$('start').style.display='none';$('lock').style.display='flex';$('lockTitle').textContent=who==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('lockSub').textContent=who==='rado'?'Rado’s famous two-letter pass.':'Sir’s legendary experience line.';$('pass').value='';$('error').textContent='';$('pass').focus()};
+window.choose=(who)=>{selected=who;$('start').style.display='none';$('lock').style.display='flex';$('lockTitle').textContent=who==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('lockSub').textContent=who==='rado'?'Har baar main kya bolti hoon?':'Mera dialogue kya hai?';$('pass').type='text';$('pass').placeholder='Apna jawab likho';$('pass').value='';$('error').textContent='';$('pass').focus()};
 window.back=()=>{$('lock').style.display='none';$('start').style.display='flex'};
 window.unlock=()=>{const v=$('pass').value.trim();const ok=selected==='rado'?v.toLowerCase()==='aa':v.toLowerCase()==='mujhe to 5 sal ka experience he';if(!ok){$('error').textContent='Wrong pass. Try the exact phrase.';return}$('lock').style.display='none';startMuseum()};
 $('pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.unlock()});
