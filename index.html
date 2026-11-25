@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Friends Museum</title>
+<style>
+:root{--gold:#d8b46b;--ink:#090d15;--panel:rgba(9,13,21,.88)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080b12;color:#f5f0e6;font-family:Georgia,serif;touch-action:none}
+#game{position:fixed;inset:0}canvas{display:block}
+#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.45))}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(120deg,rgba(3,7,13,.82),rgba(8,12,20,.72));z-index:5}
+.panel{width:min(620px,96vw);padding:clamp(22px,5vw,42px);border:1px solid rgba(216,180,107,.6);background:var(--panel);box-shadow:0 20px 80px #000;border-radius:18px;text-align:center;backdrop-filter:blur(14px)}
+.kicker{letter-spacing:.28em;text-transform:uppercase;color:var(--gold);font:11px Arial,sans-serif}
+h1{font-size:clamp(34px,7vw,58px);margin:12px 0;color:#fff1d2;font-weight:normal}p{color:#c9c2b5;line-height:1.5}
+.museums{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px}
+.museum{border:1px solid rgba(216,180,107,.45);border-radius:12px;padding:20px 12px;background:linear-gradient(145deg,#202331,#111722);color:#f5e5c4;cursor:pointer;font:18px Georgia}
+.museum small{display:block;color:#b9ad98;font:11px Arial;margin-top:8px;letter-spacing:.1em}
+input{width:100%;padding:14px;border-radius:9px;border:1px solid #8f7547;background:#101722;color:white;font-size:16px;margin:14px 0}
+button{border:1px solid var(--gold);background:linear-gradient(135deg,#b68b45,#72552d);color:#100e0a;border-radius:9px;padding:13px 20px;font-weight:bold;font-size:15px;cursor:pointer}
+.secondary{background:#161d29;color:#eee;border-color:#586070;margin-left:8px}
+#error{color:#ff9b91;min-height:20px;font:13px Arial}
+#hud{position:fixed;z-index:3;top:14px;left:14px;right:14px;display:none;justify-content:space-between;align-items:center;pointer-events:none;font:12px Arial;letter-spacing:.08em;text-shadow:0 2px 5px #000}
+#hud span{background:rgba(0,0,0,.48);padding:9px 12px;border:1px solid #9c7b45;border-radius:8px}
+#hint{position:fixed;z-index:3;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:10px 16px;border-radius:20px;font:12px Arial;display:none;white-space:nowrap}
+#touch{position:fixed;z-index:4;inset:auto 0 0 0;height:190px;display:none;pointer-events:none}
+#stick{position:absolute;left:22px;bottom:24px;width:126px;height:126px;border-radius:50%;border:2px solid #ffffff55;background:#ffffff18;pointer-events:auto}
+#nub{position:absolute;width:52px;height:52px;left:35px;top:35px;border-radius:50%;background:#d8b46b99;border:1px solid #ffe3a2}
+#looklabel{position:absolute;right:22px;bottom:24px;color:#fff9;background:#0006;padding:12px;border-radius:12px;font:11px Arial}
+#actions{position:absolute;right:22px;bottom:90px;display:flex;gap:8px;pointer-events:auto}
+#actions button{padding:12px 14px;min-width:60px}
+#photoModal{display:none;z-index:8}
+#photoModal .panel{max-height:92vh;overflow:auto}
+#bigPhoto{max-width:100%;max-height:58vh;object-fit:contain;border:8px solid #c6a66b;background:#111}
+#caption{font-size:18px;color:#f4dba8}
+@media(pointer:coarse){#touch{display:block}}
+@media(max-width:520px){.museums{grid-template-columns:1fr}.panel{padding:22px 18px}.museum{padding:13px}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="game"></div><div id="vignette"></div>
+<div id="start" class="overlay"><div class="panel"><div class="kicker">A private collection</div><h1>FRIENDS<br>MUSEUM</h1><p>Two people. Two galleries. One very personal exhibition.</p><div class="museums">
+<button class="museum" onclick="choose('rado')">RADO MUSEUM<small>ENTER WITH HER PASS</small></button>
+<button class="museum" onclick="choose('arsha')">ARSHA SIR MUSEUM<small>ENTER WITH SIR'S PASS</small></button>
+</div><p style="font-size:11px;margin-top:24px">3D WALKTHROUGH · TOUCH · KEYBOARD & MOUSE</p></div></div>
+<div id="lock" class="overlay" style="display:none"><div class="panel"><div class="kicker">Restricted gallery</div><h1 id="lockTitle">Museum pass</h1><p id="lockSub">Enter the museum's secret passphrase.</p><input id="pass" type="password" placeholder="Enter passphrase" autocomplete="off"><div id="error"></div><button onclick="unlock()">UNLOCK MUSEUM</button><button class="secondary" onclick="back()">BACK</button></div></div>
+<div id="hud"><span id="museumName">MUSEUM</span><span>WASD / JOYSTICK · E / TAP TO VIEW</span></div>
+<div id="hint">Press E or tap INTERACT to view this photograph</div>
+<div id="touch"><div id="stick"><div id="nub"></div></div><div id="actions"><button id="interact">VIEW</button><button id="run">RUN</button></div><div id="looklabel">DRAG RIGHT SIDE TO LOOK</div></div>
+<div id="photoModal" class="overlay"><div class="panel"><div class="kicker">Exhibition portrait</div><h1 id="photoTitle" style="font-size:30px">Photo</h1><img id="bigPhoto"><p id="caption"></p><button onclick="closePhoto()">BACK TO GALLERY</button></div></div>
+<script type="module">
+import * as THREE from 'three';
+const radoFiles=['rado_01.jpg','rado_02.PNG','rado_03.PNG','rado_04.PNG','rado_05.PNG','rado_06.PNG','rado_07.jpg','rado_08.PNG','rado_09.JPG'];
+const arshaFiles=Array.from({length:10},(_,i)=>`arsha_${String(i+1).padStart(2,'0')}.jpg`);
+const radoCaps=[
+'The camera opened. Rado understood the assignment.',
+'Main character energy detected. Background characters not required.',
+'Proof that one photo can contain 47 different moods.',
+'The pose says “casual”; the confidence says “cover shoot”.',
+'An official entry in the Department of Looking Unbothered.',
+'No caption can compete with this level of camera awareness.',
+'Caught in 4K: another frame added to the legend.',
+'This picture has more attitude than the museum has walls.',
+'Exhibit note: the photographer was clearly working overtime.'
+];
+const arshaCaps=[
+'Five years of experience… and still the camera needs a second take.',
+'The legendary “Mujhe to 5 sal ka experience he” era.',
+'When the experience speaks, even the frame stands straight.',
+'Sir said “simple photo”. The pose filed a different report.',
+'Five years of experience, unlimited gallery presence.',
+'The expression says the lesson is about to begin.',
+'Attendance: present. Camera confidence: also present.',
+'An advanced practical in looking serious for no reason.',
+'The experience level is high; the caption writer is under pressure.',
+'Exhibit 10: proof that every museum needs a headliner.'
+];
+const $=id=>document.getElementById(id);
+let selected='rado',active=false,near=null,photoOpen=false;
+window.choose=(who)=>{selected=who;$('start').style.display='none';$('lock').style.display='flex';$('lockTitle').textContent=who==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('lockSub').textContent=who==='rado'?'Rado’s famous two-letter pass.':'Sir’s legendary experience line.';$('pass').value='';$('error').textContent='';$('pass').focus()};
+window.back=()=>{$('lock').style.display='none';$('start').style.display='flex'};
+window.unlock=()=>{const v=$('pass').value.trim();const ok=selected==='rado'?v.toLowerCase()==='aa':v.toLowerCase()==='mujhe to 5 sal ka experience he';if(!ok){$('error').textContent='Wrong pass. Try the exact phrase.';return}$('lock').style.display='none';startMuseum()};
+$('pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.unlock()});
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x111521);scene.fog=new THREE.Fog(0x111521,15,42);
+const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,100);camera.position.set(0,1.65,8);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;$('game').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xb8c9ed,0x35251a,1.35));
+const key=new THREE.DirectionalLight(0xffdfad,2.1);key.position.set(-4,9,6);key.castShadow=true;scene.add(key);
+const ambient=new THREE.PointLight(0xd9b66f,1.2,30);ambient.position.set(0,4,0);scene.add(ambient);
+let galleryGroup=new THREE.Group();scene.add(galleryGroup);
+const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+function box(parent,x,y,z,sx,sy,sz,material){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function makePlaque(text){const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='#191710';x.fillRect(0,0,512,128);x.strokeStyle='#c9a45f';x.lineWidth=5;x.strokeRect(5,5,502,118);x.fillStyle='#f3dfb6';x.font='24px Georgia';x.textAlign='center';x.fillText(text.slice(0,48),256,72);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:t})}
+let frames=[];
+function startMuseum(){active=true;photoOpen=false;galleryGroup.clear();frames=[];camera.position.set(0,1.65,8);yaw=0;pitch=0;camera.rotation.set(0,0,0);$('hud').style.display='flex';$('museumName').textContent=selected==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('hint').style.display='block';
+const wall=mat(selected==='rado'?0x29243a:0x2d2921),floor=mat(0x35343a,.45),ceiling=mat(0x171b26),trim=mat(0xb18b50,.32,.55);
+box(galleryGroup,0,-.18,0,18,.35,22,floor);box(galleryGroup,0,5.1,0,18,.25,22,ceiling);
+box(galleryGroup,0,2.45,-11,18,5,0.35,wall);box(galleryGroup,-9,2.45,0,.35,5,22,wall);box(galleryGroup,9,2.45,0,.35,5,22,wall);
+box(galleryGroup,0,0.02,-10.78,18,.08,.12,trim);box(galleryGroup,0,4.85,-10.78,18,.08,.12,trim);
+for(let z=-7;z<=7;z+=7){box(galleryGroup,-8.78,2.5,z,.12,5,.12,trim);box(galleryGroup,8.78,2.5,z,.12,5,.12,trim)}
+// central display island and gold-accented columns
+box(galleryGroup,0,.38,0,4,.5,3,mat(0x24222b));box(galleryGroup,0,.66,0,4.15,.08,3.15,trim);
+for(const x of [-7.8,7.8])for(const z of [-8,0,8]){const col=box(galleryGroup,x,2.45,z,.24,4.9,.24,trim);col.material=mat(0x9c7945,.4,.55)}
+const files=selected==='rado'?radoFiles:arshaFiles,caps=selected==='rado'?radoCaps:arshaCaps,folder=selected==='rado'?'rado':'arsha';
+const loader=new THREE.TextureLoader();
+files.forEach((file,i)=>{const side=i%4, row=Math.floor(i/4),x=side===0?-8.78:side===1?8.78:(side===2?-5.4+row*3.6:5.4-row*3.6),z=side<2?-7.2+row*4.4:(side===2?-10.78:10.78),front=side===1||side===3;
+const tex=loader.load(`assets/${folder}/${file}`);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=renderer.capabilities.getMaxAnisotropy();
+const frame=new THREE.Group();frame.position.set(x,2.65,z);if(front)frame.rotation.y=Math.PI;galleryGroup.add(frame);
+const w=1.55,h=1.9;box(frame,0,0,-.06,w+.18,h+.18,.14,trim);box(frame,0,0,.025,w+.06,h+.06,.06,mat(0x08090d));
+const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));image.position.z=.07;frame.add(image);
+const plaque=box(frame,0,-1.16,.02,1.65,.36,.08,makePlaque(`EXHIBIT ${String(i+1).padStart(2,'0')}`));plaque.userData.caption=caps[i];plaque.userData.image=`assets/${folder}/${file}`;plaque.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(plaque);
+});
+// exit portal sign
+const sign=box(galleryGroup,0,4.35,10.78,3,.55,.08,mat(0x151923));sign.material=makePlaque('EXIT · RETURN TO MUSEUMS');
+}
+let yaw=0,pitch=0;const keys={};window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='e'||e.key==='E')interact();if(e.key==='Escape'&&photoOpen)closePhoto()});window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+renderer.domElement.addEventListener('click',()=>{if(active&&!photoOpen&&matchMedia('(pointer:fine)').matches)renderer.domElement.requestPointerLock?.()});
+document.addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement&&active&&!photoOpen){yaw-=e.movementX*.0022;pitch-=e.movementY*.0022;pitch=Math.max(-1.2,Math.min(1.2,pitch))}});
+let stick={x:0,y:0},dragLook=false,lastX=0,lastY=0;
+const stickEl=$('stick'),nub=$('nub');
+stickEl.addEventListener('pointerdown',e=>{stickEl.setPointerCapture(e.pointerId);moveStick(e)});
+stickEl.addEventListener('pointermove',e=>{if(e.buttons)moveStick(e)});
+stickEl.addEventListener('pointerup',()=>{stick={x:0,y:0};nub.style.transform='translate(0,0)'});
+function moveStick(e){const r=stickEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,l=Math.hypot(dx,dy),m=42;if(l>m){dx=dx/l*m;dy=dy/l*m}stick={x:dx/m,y:dy/m};nub.style.transform=`translate(${dx}px,${dy}px)`}
+renderer.domElement.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&e.clientX>innerWidth*.42){dragLook=true;lastX=e.clientX;lastY=e.clientY;renderer.domElement.setPointerCapture(e.pointerId)}});
+renderer.domElement.addEventListener('pointermove',e=>{if(dragLook&&e.pointerType==='touch'){yaw-=(e.clientX-lastX)*.006;pitch-=(e.clientY-lastY)*.006;pitch=Math.max(-1.2,Math.min(1.2,pitch));lastX=e.clientX;lastY=e.clientY}});
+renderer.domElement.addEventListener('pointerup',()=>dragLook=false);
+$('interact').onclick=interact;$('run').onpointerdown=()=>keys.shift=true;$('run').onpointerup=()=>keys.shift=false;
+const ray=new THREE.Raycaster();function findNear(){ray.setFromCamera(new THREE.Vector2(0,0),camera);const hits=ray.intersectObjects(frames,false);near=hits.length&&hits[0].distance<4?hits[0].object:null;$('hint').textContent=near?'Press E or tap VIEW to read this exhibit':'Explore the gallery · approach a frame to view';}
+function interact(){if(!active||photoOpen)return;findNear();if(near){photoOpen=true;$('photoTitle').textContent=near.userData.title;$('bigPhoto').src=near.userData.image;$('caption').textContent=near.userData.caption;$('photoModal').style.display='flex';if(document.pointerLockElement)document.exitPointerLock()}else if(camera.position.z>8.5){active=false;$('hud').style.display='none';$('hint').style.display='none';$('start').style.display='flex'}}
+window.closePhoto=()=>{$('photoModal').style.display='none';photoOpen=false};
+const clock=new THREE.Clock();
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(active&&!photoOpen){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-stick.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+stick.x;const len=Math.hypot(f,side)||1;f/=len;side/=len;const speed=(keys.shift?5.6:3.1)*dt;camera.position.x+= (Math.cos(yaw)*side+Math.sin(yaw)*f)*speed;camera.position.z+= (Math.sin(yaw)*side-Math.cos(yaw)*f)*speed;camera.position.x=THREE.MathUtils.clamp(camera.position.x,-8.1,8.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-10,10);findNear()}renderer.render(scene,camera)}
+animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7))});
+</script>
+</body></html>
