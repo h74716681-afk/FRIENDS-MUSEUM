@@ -43,7 +43,7 @@ button{border:1px solid var(--gold);background:linear-gradient(135deg,#b68b45,#7
 <button class="museum" onclick="choose('rado')">RADO MUSEUM<small>ENTER WITH HER PASS</small></button>
 <button class="museum" onclick="choose('arsha')">ARSHA SIR MUSEUM<small>ENTER WITH SIR'S PASS</small></button>
 </div><p style="font-size:11px;margin-top:24px">3D WALKTHROUGH · TOUCH · KEYBOARD & MOUSE</p></div></div>
-<div id="lock" class="overlay" style="display:none"><div class="panel"><div class="kicker">Restricted gallery</div><h1 id="lockTitle">Museum pass</h1><p id="lockSub">Enter the museum's secret passphrase.</p><input id="pass" type="password" placeholder="Enter passphrase" autocomplete="off"><div id="error"></div><button onclick="unlock()">UNLOCK MUSEUM</button><button class="secondary" onclick="back()">BACK</button></div></div>
+<div id="lock" class="overlay" style="display:none"><div class="panel"><div class="kicker">Restricted gallery</div><h1 id="lockTitle">Museum pass</h1><p id="lockSub">Enter the museum's secret passphrase.</p><input id="pass" type="password" placeholder="Enter passphrase" autocomplete="off"><div id="error"></div><button onclick="replayVoice()">REPLAY VOICE</button><button onclick="unlock()">UNLOCK MUSEUM</button><button class="secondary" onclick="back()">BACK</button></div></div>
 <div id="hud"><span id="museumName">MUSEUM</span><span>WASD / JOYSTICK · E / VIEW NEARBY PHOTO</span></div>
 <div id="hint">Press E or tap INTERACT to view this photograph</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="actions"><button id="interact">VIEW</button><button id="run">RUN</button></div><div id="looklabel">DRAG RIGHT SIDE TO LOOK</div></div>
@@ -77,9 +77,16 @@ const arshaCaps=[
 ];
 const $=id=>document.getElementById(id);
 let selected='rado',active=false,near=null,photoOpen=false;
-window.choose=(who)=>{selected=who;$('start').style.display='none';$('lock').style.display='flex';$('lockTitle').textContent=who==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('lockSub').textContent=who==='rado'?'Har baar main kya bolti hoon?':'Mera dialogue kya hai?';$('pass').type='text';$('pass').placeholder='Apna jawab likho';$('pass').value='';$('error').textContent='';$('pass').focus()};
-window.back=()=>{$('lock').style.display='none';$('start').style.display='flex'};
-window.unlock=()=>{const v=$('pass').value.trim();const ok=selected==='rado'?v.toLowerCase()==='aa':v.toLowerCase()==='mujhe to 5 sal ka experience he';if(!ok){$('error').textContent='Wrong pass. Try the exact phrase.';return}$('lock').style.display='none';startMuseum()};
+const voiceFiles={
+ rado:{entry:'assets/voices/rado_entry.mp3.m4a',correct:'assets/voices/rado_correct.mp3.m4a',wrong:'assets/voices/rado_wrong.mp3.m4a'},
+ arsha:{entry:'assets/voices/arsha_entry.mp3.aac',correct:'assets/voices/arsha_correct.mp3.m4a',wrong:'assets/voices/arsha_wrong.mp3.aac'}
+};
+let voicePlayer=new Audio(),lastVoice='';
+function playVoice(who,event){const src=voiceFiles[who]?.[event];if(!src)return;lastVoice=src;voicePlayer.pause();voicePlayer.currentTime=0;voicePlayer.src=src;voicePlayer.load();const p=voicePlayer.play();if(p&&p.catch)p.catch(err=>console.warn('Voice playback blocked or unavailable:',src,err))}
+window.replayVoice=()=>{if(!lastVoice)return;voicePlayer.pause();voicePlayer.currentTime=0;voicePlayer.src=lastVoice;voicePlayer.play().catch(err=>console.warn('Voice replay blocked:',err))};
+window.choose=(who)=>{selected=who;$('start').style.display='none';$('lock').style.display='flex';$('lockTitle').textContent=who==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('lockSub').textContent=who==='rado'?'Har baar main kya bolti hoon?':'Mera dialogue kya hai?';$('pass').type='text';$('pass').placeholder='Apna jawab likho';$('pass').value='';$('error').textContent='';playVoice(who,'entry');$('pass').focus()};
+window.back=()=>{voicePlayer.pause();$('lock').style.display='none';$('start').style.display='flex'};
+window.unlock=()=>{const v=$('pass').value.trim();const ok=selected==='rado'?v.toLowerCase()==='aa':v.toLowerCase()==='mujhe to 5 sal ka experience he';if(!ok){$('error').textContent='Wrong pass. Try the exact phrase.';playVoice(selected,'wrong');return}playVoice(selected,'correct');$('lock').style.display='none';startMuseum()};
 $('pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.unlock()});
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x111521);scene.fog=new THREE.Fog(0x111521,15,42);
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,100);camera.position.set(0,1.65,8);
