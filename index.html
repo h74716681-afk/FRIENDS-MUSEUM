@@ -201,7 +201,7 @@ const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.l
 box(frame,0,0,-.06,w+.28,h+.28,.2,darkGold);
 box(frame,0,0,-.005,w+.19,h+.19,.12,trim);
 box(frame,0,0,.025,w+.08,h+.08,.06,mat(0x08090d));
-const innerLine=new THREE.Mesh(new THREE.PlaneGeometry(w+.035,h+.035),new THREE.MeshBasicMaterial({color:0xe8c987,side:THREE.DoubleSide}));innerLine.position.z=.058;frame.add(innerLine);
+// The gold inner trim is built into the layered frame; keep the portrait unobstructed.
 for(const sx of [-1,1])for(const sy of [-1,1]){
  const stud=new THREE.Mesh(new THREE.SphereGeometry(.055,10,8),lightGold);stud.position.set(sx*(w/2+.085),sy*(h/2+.085),.12);frame.add(stud);
 }
