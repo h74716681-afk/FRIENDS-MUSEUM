@@ -157,6 +157,7 @@ box(galleryGroup,0,.38,0,4,.5,3,mat(0x24222b));box(galleryGroup,0,.66,0,4.15,.08
 // Three low-poly award trophies on the central island (kept lightweight for iPad).
 const trophyGold=new THREE.MeshStandardMaterial({color:0xe2bd70,metalness:.72,roughness:.26,emissive:0x4b2d08,emissiveIntensity:.18});
 const trophyDark=mat(0x28202a,.42,.25);
+const darkGold=mat(0x76552d,.32,.7),lightGold=mat(0xd7b46d,.28,.65);
 function addTrophy(x,kind,label){
  const g=new THREE.Group();g.position.set(x,.72,0);galleryGroup.add(g);
  const plinth=new THREE.Mesh(new THREE.BoxGeometry(.82,.18,.72),trophyDark);plinth.position.y=.09;g.add(plinth);
@@ -179,7 +180,6 @@ addTrophy(1.25,'crown','BOSS LEVEL');
 for(const x of [-7.8,7.8])for(const z of [-8,0,8]){const col=box(galleryGroup,x,2.45,z,.24,4.9,.24,trim);col.material=mat(0x9c7945,.4,.55)}
 // Premium ceiling lights: glowing fixtures with a small number of real lights for mobile performance
 const glowMat=new THREE.MeshStandardMaterial({color:0xffe2a1,emissive:0xffc45c,emissiveIntensity:2.2,roughness:.25});
-const darkGold=mat(0x76552d,.32,.7),lightGold=mat(0xd7b46d,.28,.65);
 for(const x of [-5.8,0,5.8])for(const z of [-6,1,7]){
  const fixture=new THREE.Group();fixture.position.set(x,4.88,z);galleryGroup.add(fixture);
  const base=new THREE.Mesh(new THREE.CylinderGeometry(.32,.42,.12,20),darkGold);fixture.add(base);
