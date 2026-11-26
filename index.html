@@ -178,7 +178,7 @@ function buildLobby(){
  const kioskLabel=box(kiosk,0,1.72,-.02,1.35,.32,.12,gold);kioskLabel.material=makePlaque('VISITOR INFO');
  // Friendly 3D museum guide standing beside the visitor kiosk.
  const guide=new THREE.Group();guide.position.set(-6.6,0,3.35);lobbyGroup.add(guide);
- const guideGold=mat(0xd7b46d,.3,.65),guideDark=mat(0x182334,.35,.35),guideGlow=new THREE.MeshStandardMaterial({color:0x8fe8ff,emissive:0x2a9fc5,emissiveIntensity:1.8,metalness:.25,roughness:.2);
+ const guideGold=mat(0xd7b46d,.3,.65),guideDark=mat(0x182334,.35,.35),guideGlow=new THREE.MeshStandardMaterial({color:0x8fe8ff,emissive:0x2a9fc5,emissiveIntensity:1.8,metalness:.25,roughness:.2});
  const guideBase=new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,.16,16),guideGold);guideBase.position.y=.08;guide.add(guideBase);
  const guideBody=new THREE.Mesh(new THREE.BoxGeometry(.58,.72,.38),guideDark);guideBody.position.y=.58;guide.add(guideBody);
  const guideChest=new THREE.Mesh(new THREE.BoxGeometry(.34,.18,.035),guideGlow);guideChest.position.set(0,.64,.207);guide.add(guideChest);
