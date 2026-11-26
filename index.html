@@ -130,7 +130,7 @@ const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-per
 scene.add(new THREE.HemisphereLight(0xb8c9ed,0x35251a,1.35));
 const key=new THREE.DirectionalLight(0xffdfad,2.1);key.position.set(-4,9,6);key.castShadow=true;scene.add(key);
 const ambient=new THREE.PointLight(0xd9b66f,1.2,30);ambient.position.set(0,4,0);scene.add(ambient);
-let galleryGroup=new THREE.Group();scene.add(galleryGroup);
+let galleryGroup=new THREE.Group();scene.add(galleryGroup);let dustParticles=null;
 const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 function proceduralSurface(base,vein,kind){
  const c=document.createElement('canvas');c.width=512;c.height=512;const g=c.getContext('2d');
@@ -200,6 +200,12 @@ for(const side of [-1,1])for(const z of [-5.2,3.8]){
  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.09,12,10),glowMat);bulb.position.set(0,-.25,.27);sconce.add(bulb);
  const lamp=new THREE.PointLight(0xffc77a,18,7,2);lamp.position.set(side*8.1,3.45,z);galleryGroup.add(lamp);
 }
+// Subtle floating gold dust for a quiet, premium museum atmosphere (single lightweight point cloud).
+const dustGeometry=new THREE.BufferGeometry();const dustPositions=new Float32Array(90*3);
+for(let i=0;i<90;i++){dustPositions[i*3]=(Math.random()-.5)*16;dustPositions[i*3+1]=.35+Math.random()*4.2;dustPositions[i*3+2]=(Math.random()-.5)*19}
+dustGeometry.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));
+const dustMaterial=new THREE.PointsMaterial({color:0xe8c77f,size:.045,transparent:true,opacity:.38,depthWrite:false,sizeAttenuation:true});
+dustParticles=new THREE.Points(dustGeometry,dustMaterial);dustParticles.frustumCulled=false;galleryGroup.add(dustParticles);
 // Decorative planters in the gallery corners
 
 // Architectural realism: layered skirting, crown moulding and recessed ceiling perimeter
@@ -319,7 +325,7 @@ window.changeExhibit=(step)=>{if(!photoOpen)return;openExhibit(currentExhibit+st
 function interact(){if(!active||photoOpen)return;findNear();if(near){openExhibit(frames.indexOf(near))}else if(camera.position.z>8.5){active=false;$('hud').style.display='none';$('progressWrap').style.display='none';$('hint').style.display='none';$('start').style.display='flex'}}
 window.closePhoto=()=>{voicePlayer.pause();voicePlayer.currentTime=0;$('photoModal').style.display='none';photoOpen=false};
 const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(active&&!photoOpen){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-stick.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+stick.x;const len=Math.hypot(f,side)||1;f/=len;side/=len;const speed=(keys.shift?6.8:4.2)*dt;const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();camera.position.x+=(right.x*side+forward.x*f)*speed;camera.position.z+=(right.z*side+forward.z*f)*speed;camera.position.x=THREE.MathUtils.clamp(camera.position.x,-8.1,8.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-10,10);findNear()}renderer.render(scene,camera)}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(active&&dustParticles)dustParticles.rotation.y+=dt*.012;if(active&&!photoOpen){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-stick.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+stick.x;const len=Math.hypot(f,side)||1;f/=len;side/=len;const speed=(keys.shift?6.8:4.2)*dt;const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();camera.position.x+=(right.x*side+forward.x*f)*speed;camera.position.z+=(right.z*side+forward.z*f)*speed;camera.position.x=THREE.MathUtils.clamp(camera.position.x,-8.1,8.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-10,10);findNear()}renderer.render(scene,camera)}
 animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.35))});
 </script>
 </body></html>
