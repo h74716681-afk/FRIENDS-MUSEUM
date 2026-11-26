@@ -126,7 +126,7 @@ window.unlock=()=>{const v=$('pass').value.trim();const ok=selected==='rado'?v.t
 $('pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.unlock()});
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x111521);scene.fog=new THREE.Fog(0x111521,15,42);
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,100);camera.position.set(0,1.65,8);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;$('game').appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;$('game').appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xb8c9ed,0x35251a,1.35));
 const key=new THREE.DirectionalLight(0xffdfad,2.1);key.position.set(-4,9,6);key.castShadow=true;scene.add(key);
 const ambient=new THREE.PointLight(0xd9b66f,1.2,30);ambient.position.set(0,4,0);scene.add(ambient);
@@ -253,7 +253,7 @@ const files=selected==='rado'?radoFiles:arshaFiles,caps=selected==='rado'?radoCa
 const loader=new THREE.TextureLoader();
 files.forEach((file,i)=>{const side=i%4,row=Math.floor(i/4),x=side===0?-8.55:side===1?8.55:(side===2?-5.4+row*3.6:5.4-row*3.6),z=side<2?-7.2+row*4.4:(side===2?-10.55:10.55);
 const frame=new THREE.Group();frame.position.set(x,2.65,z);if(side===0)frame.rotation.y=Math.PI/2;else if(side===1)frame.rotation.y=-Math.PI/2;else if(side===3)frame.rotation.y=Math.PI;galleryGroup.add(frame);
-const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
+const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{const source=t.image,maxSize=1024;if(source.width>maxSize||source.height>maxSize){const scale=Math.min(maxSize/source.width,maxSize/source.height),canvas=document.createElement('canvas');canvas.width=Math.round(source.width*scale);canvas.height=Math.round(source.height*scale);canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);t.image=canvas}t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;t.magFilter=THREE.LinearFilter;t.needsUpdate=true;const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
 box(frame,0,0,-.06,w+.28,h+.28,.2,darkGold);
 box(frame,0,0,-.005,w+.19,h+.19,.12,trim);
 box(frame,0,0,.025,w+.08,h+.08,.06,mat(0x08090d));
@@ -290,6 +290,6 @@ function interact(){if(!active||photoOpen)return;findNear();if(near){openExhibit
 window.closePhoto=()=>{voicePlayer.pause();voicePlayer.currentTime=0;$('photoModal').style.display='none';photoOpen=false};
 const clock=new THREE.Clock();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(active&&!photoOpen){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-stick.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+stick.x;const len=Math.hypot(f,side)||1;f/=len;side/=len;const speed=(keys.shift?6.8:4.2)*dt;const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();camera.position.x+=(right.x*side+forward.x*f)*speed;camera.position.z+=(right.z*side+forward.z*f)*speed;camera.position.x=THREE.MathUtils.clamp(camera.position.x,-8.1,8.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-10,10);findNear()}renderer.render(scene,camera)}
-animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7))});
+animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.35))});
 </script>
 </body></html>
