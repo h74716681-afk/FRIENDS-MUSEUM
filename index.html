@@ -47,7 +47,7 @@ button{border:1px solid var(--gold);background:linear-gradient(135deg,#b68b45,#7
 <div id="hud"><span id="museumName">MUSEUM</span><span>WASD / JOYSTICK · E / VIEW NEARBY PHOTO</span></div>
 <div id="hint">Press E or tap INTERACT to view this photograph</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="actions"><button id="interact">VIEW</button><button id="run">RUN</button></div><div id="looklabel">DRAG RIGHT SIDE TO LOOK</div></div>
-<div id="photoModal" class="overlay"><div class="panel"><div class="kicker">Exhibition portrait</div><h1 id="photoTitle" style="font-size:30px">Photo</h1><img id="bigPhoto"><p id="caption"></p><button onclick="closePhoto()">BACK TO GALLERY</button></div></div>
+<div id="photoModal" class="overlay"><div class="panel"><div class="kicker">Exhibition portrait</div><h1 id="photoTitle" style="font-size:30px">Photo</h1><img id="bigPhoto"><div class="kicker" style="margin-top:18px">Exhibit story</div><p id="caption"></p><button onclick="replayVoice()">REPLAY FUNNY VOICE</button><button class="secondary" onclick="closePhoto()">BACK TO GALLERY</button></div></div>
 <script type="module">
 import * as THREE from 'three';
 const radoFiles=['rado_01.jpg','rado_02.png','rado_03.png','rado_04.png','rado_05.png','rado_06.png','rado_07.jpg','rado_08.png','rado_09.jpg'];
