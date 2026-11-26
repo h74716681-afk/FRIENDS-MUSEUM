@@ -152,7 +152,30 @@ box(galleryGroup,0,2.45,-11,18,5,0.35,wall);box(galleryGroup,-9,2.45,0,.35,5,22,
 box(galleryGroup,0,0.02,-10.78,18,.08,.12,trim);box(galleryGroup,0,4.85,-10.78,18,.08,.12,trim);
 for(let z=-7;z<=7;z+=7){box(galleryGroup,-8.78,2.5,z,.12,5,.12,trim);box(galleryGroup,8.78,2.5,z,.12,5,.12,trim)}
 // central display island and gold-accented columns
+
 box(galleryGroup,0,.38,0,4,.5,3,mat(0x24222b));box(galleryGroup,0,.66,0,4.15,.08,3.15,trim);
+// Three low-poly award trophies on the central island (kept lightweight for iPad).
+const trophyGold=new THREE.MeshStandardMaterial({color:0xe2bd70,metalness:.72,roughness:.26,emissive:0x4b2d08,emissiveIntensity:.18});
+const trophyDark=mat(0x28202a,.42,.25);
+function addTrophy(x,kind,label){
+ const g=new THREE.Group();g.position.set(x,.72,0);galleryGroup.add(g);
+ const plinth=new THREE.Mesh(new THREE.BoxGeometry(.82,.18,.72),trophyDark);plinth.position.y=.09;g.add(plinth);
+ const foot=new THREE.Mesh(new THREE.CylinderGeometry(.22,.27,.12,16),trophyGold);foot.position.y=.24;g.add(foot);
+ const stem=new THREE.Mesh(new THREE.CylinderGeometry(.075,.11,.34,12),trophyGold);stem.position.y=.46;g.add(stem);
+ if(kind==='star'){
+  const star=new THREE.Mesh(new THREE.OctahedronGeometry(.31,0),trophyGold);star.position.y=.78;g.add(star);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.34,.025,6,24),lightGold);ring.position.y=.78;g.add(ring);
+ }else{
+  const cup=new THREE.Mesh(new THREE.CylinderGeometry(.12,.28,.34,16,1,false),trophyGold);cup.position.y=.78;g.add(cup);
+  for(const s of [-1,1]){const handle=new THREE.Mesh(new THREE.TorusGeometry(.15,.035,7,16,Math.PI),trophyGold);handle.position.set(s*.23,.82,0);handle.rotation.z=s===-1?Math.PI/2:-Math.PI/2;g.add(handle)}
+  if(kind==='crown'){for(let j=0;j<5;j++){const spike=new THREE.Mesh(new THREE.ConeGeometry(.055,.18,7),trophyGold);spike.position.set((j-2)*.105,.99,0);g.add(spike)}}
+ }
+ const labelMesh=box(g,0,-.015,.39,.76,.16,.035,makePlaque(label));labelMesh.castShadow=false;labelMesh.receiveShadow=false;
+}
+addTrophy(-1.25,'cup','LEGEND AWARD');
+addTrophy(0,'star','PHOTO ICON');
+addTrophy(1.25,'crown','BOSS LEVEL');
+
 for(const x of [-7.8,7.8])for(const z of [-8,0,8]){const col=box(galleryGroup,x,2.45,z,.24,4.9,.24,trim);col.material=mat(0x9c7945,.4,.55)}
 // Premium ceiling lights: glowing fixtures with a small number of real lights for mobile performance
 const glowMat=new THREE.MeshStandardMaterial({color:0xffe2a1,emissive:0xffc45c,emissiveIntensity:2.2,roughness:.25});
@@ -195,6 +218,15 @@ for(const side of [-1,1])for(const z of [-7.2,-2.8,1.6,6]){
  const x=side*8.22;const arm=box(galleryGroup,x,4.02,z,.055,.48,.055,pictureGold);arm.rotation.x=.22;
  const hood=new THREE.Mesh(new THREE.CylinderGeometry(.11,.19,.16,12),pictureGold);hood.position.set(x,3.78,z);hood.rotation.x=Math.PI/2;galleryGroup.add(hood);
  const lens=new THREE.Mesh(new THREE.CircleGeometry(.115,16),glowMat);lens.position.set(x,3.69,z);lens.rotation.x=-Math.PI/2;galleryGroup.add(lens);
+}
+
+// Focused photo spotlights: four soft, shadow-free beams to keep mobile rendering stable.
+for(const side of [-1,1])for(const z of [-5.1,4.2]){
+ const spot=new THREE.SpotLight(0xffd99a,34,10,Math.PI/5,.62,1.5);
+ spot.position.set(side*7.55,4.35,z);
+ spot.target.position.set(side*8.72,2.65,z);
+ spot.castShadow=false;
+ galleryGroup.add(spot);galleryGroup.add(spot.target);
 }
 // Upholstered viewing benches outside the central walking line
 function makeBench(x,z){const wood=mat(0x49352b,.42,.16),velvet=mat(0x34202b,.92,0);box(galleryGroup,x,.48,z,2.15,.22,.62,velvet);box(galleryGroup,x,.34,z,2.28,.08,.7,wood);for(const dx of [-.88,.88])for(const dz of [-.22,.22])box(galleryGroup,x+dx,.16,z+dz,.075,.34,.075,pictureGold)}
