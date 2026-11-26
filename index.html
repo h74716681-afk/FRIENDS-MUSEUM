@@ -97,7 +97,7 @@ const arshaCaps=[
 'Final exhibit: proof that experience also knows how to pose.'
 ];
 const $=id=>document.getElementById(id);
-let selected='rado',active=false,near=null,nearGuide=false,photoOpen=false,currentExhibit=0,secretFound=false,secretOpen=false,guideOpen=false,gameMode='menu',lobbyGroup=null,lobbyDoors=[],lobbyDoorPanels=[],guideRig=null,doorAnimation=null,vipGroup=null,vipExitNear=false,focusSpot=null,focusTarget=null;const visitedExhibits=new Set(),trophyDisplays=[];
+let selected='rado',active=false,near=null,nearGuide=false,photoOpen=false,currentExhibit=0,secretFound=false,secretOpen=false,guideOpen=false,gameMode='menu',lobbyGroup=null,lobbyDoors=[],lobbyDoorPanels=[],guideRig=null,doorAnimation=null,vipGroup=null,vipExitNear=false,focusSpot=null,focusTarget=null,vipOrb=null,vipRing=null;const visitedExhibits=new Set(),trophyDisplays=[];
 const voiceFiles={
  rado:{entry:'assets/voices/rado_entry.mp3.m4a',correct:'assets/voices/rado_correct.mp3.m4a',wrong:'assets/voices/rado_wrong.mp3.m4a'},
  arsha:{entry:'assets/voices/arsha_entry.mp3.aac',correct:'assets/voices/arsha_correct.mp3.m4a',wrong:'assets/voices/arsha_wrong.mp3.aac'}
@@ -408,8 +408,8 @@ const vipWall=mat(0x171b2b,.72,.22),vipGold=mat(0xd9b66f,.28,.7),vipFloor=mat(0x
 box(vipGroup,0,-.18,-32,8,.36,10,vipFloor);box(vipGroup,0,5,-32,8,.25,10,vipWall);box(vipGroup,-4,2.4,-32,.25,4.8,10,vipWall);box(vipGroup,4,2.4,-32,.25,4.8,10,vipWall);box(vipGroup,0,2.4,-37,8,4.8,.25,vipWall);box(vipGroup,-3,2.4,-27,2,4.8,.25,vipWall);box(vipGroup,3,2.4,-27,2,4.8,.25,vipWall);
 for(const z of [-36.7,-27.3])box(vipGroup,0,.08,z,7.6,.16,.08,vipGold);for(const x of [-3.7,3.7])box(vipGroup,x,.08,-32,.08,.16,9.2,vipGold);
 const vipTitle=box(vipGroup,0,3.8,-36.82,5.5,.8,.12,vipGold);vipTitle.material=makePlaque('PRIVATE VIP COLLECTION');
-const vipPedestal=box(vipGroup,0,.48,-32,2.3,.9,2.1,vipGold);const vipOrb=new THREE.Mesh(new THREE.IcosahedronGeometry(.62,1),new THREE.MeshStandardMaterial({color:0xffd982,emissive:0x9b681e,emissiveIntensity:1.2,metalness:.65,roughness:.2}));vipOrb.position.set(0,1.45,-32);vipGroup.add(vipOrb);
-const vipRing=new THREE.Mesh(new THREE.TorusGeometry(.9,.035,8,40),vipGold);vipRing.position.set(0,1.45,-32);vipRing.rotation.x=Math.PI/2;vipGroup.add(vipRing);
+const vipPedestal=box(vipGroup,0,.48,-32,2.3,.9,2.1,vipGold);vipOrb=new THREE.Mesh(new THREE.IcosahedronGeometry(.62,1),new THREE.MeshStandardMaterial({color:0xffd982,emissive:0x9b681e,emissiveIntensity:1.2,metalness:.65,roughness:.2}));vipOrb.position.set(0,1.45,-32);vipGroup.add(vipOrb);
+vipRing=new THREE.Mesh(new THREE.TorusGeometry(.9,.035,8,40),vipGold);vipRing.position.set(0,1.45,-32);vipRing.rotation.x=Math.PI/2;vipGroup.add(vipRing);
 const vipLamp=new THREE.PointLight(0xffd28a,22,9,2);vipLamp.position.set(0,3.2,-32);vipGroup.add(vipLamp);
 const vipExit=box(vipGroup,0,2.1,-27.18,2.4,3.6,.06,mat(0x101522));vipExit.material=makePlaque('EXIT · BACK TO GALLERY');
 // exit portal sign
