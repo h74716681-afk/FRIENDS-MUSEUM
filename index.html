@@ -67,7 +67,6 @@ button:active{filter:brightness(1.15);transform:translateY(1px)}
 <div id="hint">Press E or tap INTERACT to view this photograph</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="actions"><button id="interact">VIEW</button><button id="run">RUN</button></div><div id="looklabel">DRAG RIGHT SIDE TO LOOK</div></div>
 <div id="secretModal" class="overlay"><div class="panel"><div class="kicker">Hidden museum secret</div><h1 style="font-size:34px">YOU FOUND IT!</h1><p id="secretMessage">A little secret, just for the people who make this museum special.</p><button onclick="closeSecret()">BACK TO GALLERY</button></div></div>
-<div id="discoveryModal" class="overlay" style="display:none"><div class="panel" style="border:1px solid #e3c27d;box-shadow:0 24px 90px #000,0 0 36px #d8b46b30"><p id="discoveryMessage" style="font-size:19px;line-height:1.55;margin:0;text-align:center"></p></div></div>
 <div id="photoModal" class="overlay"><div class="panel"><div class="kicker">Museum archive · original voice recording</div><h1 id="photoTitle" style="font-size:30px">Photo</h1><img id="bigPhoto"><div id="photoCount">EXHIBIT 1</div><div class="kicker" style="margin-top:12px">Exhibit story</div><p id="caption"></p><p id="photoMeta" style="font:bold 13px Arial;color:#ffe0a0;line-height:1.6"></p><div class="modalActions"><button class="secondary" onclick="changeExhibit(-1)">PREVIOUS</button><button onclick="replayVoice()">REPLAY VOICE</button><button class="secondary" onclick="changeExhibit(1)">NEXT</button></div><button class="secondary" style="margin-top:12px" onclick="closePhoto()">BACK TO GALLERY</button></div></div>
 <script type="module">
 import * as THREE from 'three';
@@ -97,7 +96,7 @@ const arshaCaps=[
 'Final exhibit: proof that experience also knows how to pose.'
 ];
 const $=id=>document.getElementById(id);
-let selected='rado',active=false,near=null,photoOpen=false,currentExhibit=0,secretFound=false,secretOpen=false,gameMode='menu',lobbyGroup=null,lobbyDoors=[],lobbyFinds=[],nearLobbyPhoto=null;const visitedExhibits=new Set();
+let selected='rado',active=false,near=null,photoOpen=false,currentExhibit=0,secretFound=false,secretOpen=false,gameMode='menu',lobbyGroup=null,lobbyDoors=[];const visitedExhibits=new Set();
 const voiceFiles={
  rado:{entry:'assets/voices/rado_entry.mp3.m4a',correct:'assets/voices/rado_correct.mp3.m4a',wrong:'assets/voices/rado_wrong.mp3.m4a'},
  arsha:{entry:'assets/voices/arsha_entry.mp3.aac',correct:'assets/voices/arsha_correct.mp3.m4a',wrong:'assets/voices/arsha_wrong.mp3.aac'}
@@ -135,7 +134,7 @@ const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,meta
 function buildLobby(){
  galleryGroup.visible=false;
  if(lobbyGroup){scene.remove(lobbyGroup);lobbyGroup=null}
- lobbyDoors=[];lobbyFinds=[];nearLobbyPhoto=null;
+ lobbyDoors=[];
  lobbyGroup=new THREE.Group();scene.add(lobbyGroup);
  const stone=mat(0x383642,.32,.2),wall=mat(0x252633,.86),gold=mat(0xb18b50,.32,.6),dark=mat(0x111521,.5,.25),cream=mat(0x9b8b70,.58,.12);
  // Grand lobby shell with two clear, open museum entrances.
@@ -208,23 +207,6 @@ function buildLobby(){
  for(let i=0;i<8;i++){const a=i*Math.PI/4;const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(.12,0),new THREE.MeshStandardMaterial({color:0xffe5b3,emissive:0x8c632a,emissiveIntensity:1,metalness:.2,roughness:.2}));crystal.position.set(Math.cos(a)*1.08,-.32,Math.sin(a)*1.08);chandelier.add(crystal)}
  const core=new THREE.PointLight(0xffd28a,16,12,2);core.position.y=-.45;chandelier.add(core);
  for(const z of [-8,-4,0,4,8])box(lobbyGroup,0,5.18,z,20,.08,.12,gold);
- // Hidden memory beacons scattered around the lobby; two belong to each collection.
- const lobbySpots=[[-7.1,2.6],[-5.1,-3.6],[7.2,2.4],[5.4,-3.8]];
- const lobbyMemoryData=[
-  {who:'rado',file:radoFiles[0],caption:radoCaps[0],number:1,place:'Lobby · left display corner'},
-  {who:'arsha',file:arshaFiles[0],caption:arshaCaps[0],number:1,place:'Lobby · near the visitor kiosk'},
-  {who:'rado',file:radoFiles[1],caption:radoCaps[1],number:2,place:'Lobby · right side seating area'},
-  {who:'arsha',file:arshaFiles[1],caption:arshaCaps[1],number:2,place:'Lobby · right gallery approach'}
- ];
- lobbyMemoryData.forEach((data,i)=>{
-  const marker=new THREE.Group();marker.position.set(lobbySpots[i][0],1.45,lobbySpots[i][1]);lobbyGroup.add(marker);
-  const color=data.who==='rado'?0xf0a6c4:0x9ecfff;
-  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.19,0),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:1.65,metalness:.25,roughness:.2}));marker.add(gem);
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(.34,.035,8,28),new THREE.MeshBasicMaterial({color:0xffdf91}));marker.add(ring);
-  const halo=new THREE.Mesh(new THREE.TorusGeometry(.48,.012,6,28),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.65}));marker.add(halo);
-  const lamp=new THREE.PointLight(color,2.5,3);marker.add(lamp);
-  lobbyFinds.push({group:marker,data,found:false});
- });
  camera.position.set(0,1.65,6.5);yaw=0;pitch=0;camera.rotation.set(0,0,0);gameMode='lobby';active=true;near=null;
  $('start').style.display='none';$('lock').style.display='none';$('hud').style.display='flex';$('museumName').textContent='MAIN LOBBY';$('progressWrap').style.display='none';$('hint').style.display='block';$('hint').textContent='Walk to Rado Museum or Arsha Sir Museum and tap VIEW';
 }
@@ -400,15 +382,9 @@ const outerFrame=box(frame,0,0,-.045,w+.22,h+.22,.12,darkGold);
 const innerFrame=box(frame,0,0,.015,w+.12,h+.12,.045,trim);
 for(const part of [outerFrame,innerFrame]){part.castShadow=false;part.receiveShadow=false}
 
-const photoMaterial=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),photoMaterial);image.position.z=.075;image.renderOrder=10;image.visible=false;frame.add(image);
-const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));plaque.visible=false;outerFrame.visible=false;innerFrame.visible=false;
-// Golden beacon marks the hidden exhibit; the actual photo appears only when the player gets close.
-const beacon=new THREE.Group();beacon.position.set(0,1.48,.22);frame.add(beacon);
-const beaconMat=new THREE.MeshBasicMaterial({color:0xffd36b});
-const beaconCore=new THREE.Mesh(new THREE.OctahedronGeometry(.16,0),new THREE.MeshStandardMaterial({color:0xffd36b,emissive:0xffa51e,emissiveIntensity:1.8,metalness:.25,roughness:.2}));beacon.add(beaconCore);
-const beaconRing=new THREE.Mesh(new THREE.TorusGeometry(.28,.035,8,28),beaconMat);beacon.add(beaconRing);
-const beaconHalo=new THREE.Mesh(new THREE.TorusGeometry(.4,.012,6,28),new THREE.MeshBasicMaterial({color:0xffe7a6,transparent:true,opacity:.72}));beaconHalo.position.z=-.015;beacon.add(beaconHalo);
-image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;image.userData.voice='assets/voices/'+encodeURIComponent(funnyVoiceFiles[selected][i]);image.userData.found=false;image.userData.beacon=beacon;image.userData.frameParts=[outerFrame,innerFrame,plaque];plaque.userData.isExhibit=true;frames.push(image);
+const photoMaterial=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),photoMaterial);image.position.z=.075;image.renderOrder=10;image.visible=true;frame.add(image);
+const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));plaque.visible=true;outerFrame.visible=true;innerFrame.visible=true;
+image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;image.userData.voice='assets/voices/'+encodeURIComponent(funnyVoiceFiles[selected][i]);image.userData.frameParts=[outerFrame,innerFrame,plaque];plaque.userData.isExhibit=true;frames.push(image);
 });
 // exit portal sign
 const sign=box(galleryGroup,0,4.35,10.78,3,.55,.08,mat(0x151923));sign.material=makePlaque('EXIT · RETURN TO MUSEUMS');
@@ -428,14 +404,13 @@ renderer.domElement.addEventListener('pointermove',e=>{if(e.pointerId!==lookPoin
 function stopLook(e){if(e.pointerId===lookPointer)lookPointer=null}
 renderer.domElement.addEventListener('pointerup',stopLook);renderer.domElement.addEventListener('pointercancel',stopLook);
 $('interact').onclick=interact;$('run').onpointerdown=e=>{e.preventDefault();keys.shift=true};$('run').onpointerup=()=>keys.shift=false;$('run').onpointercancel=()=>keys.shift=false;
-function findNear(){if(gameMode==='lobby'){let bestMemory=null,memoryDistance=Infinity;for(const item of lobbyFinds){if(item.found)continue;const d=Math.hypot(camera.position.x-item.group.position.x,camera.position.z-item.group.position.z);if(d<memoryDistance){memoryDistance=d;bestMemory=item}}nearLobbyPhoto=memoryDistance<2.5?bestMemory:null;let bestDoor=null,bestDistance=Infinity;for(const door of lobbyDoors){const d=Math.hypot(camera.position.x-door.x,camera.position.z-door.z);if(d<bestDistance){bestDistance=d;bestDoor=door}}near=bestDistance<3.4?bestDoor:null;$('hint').textContent=nearLobbyPhoto?`HIDDEN MEMORY FOUND · ${nearLobbyPhoto.data.who==='rado'?'RADO':'ARSHA SIR'} · tap VIEW`:near?`RADO / ARSHA SIR MUSEUM · tap VIEW to enter`:'Explore the lobby · follow the golden glows to find hidden photos';return}let best=null,bestDistance=Infinity;for(const exhibit of frames){const p=new THREE.Vector3();exhibit.getWorldPosition(p);const d=camera.position.distanceTo(p);if(!exhibit.userData.found&&d<4.8){exhibit.userData.found=true;exhibit.visible=true;for(const part of exhibit.userData.frameParts)part.visible=true;exhibit.userData.beacon.visible=false}if(d<bestDistance){bestDistance=d;best=exhibit}}near=bestDistance<3.6?best:null;const secretDistance=Math.hypot(camera.position.x-2.55,camera.position.z+1.85);$('hint').textContent=secretDistance<1.8&&!secretFound?'A hidden golden secret is nearby · press E or tap VIEW':near?'Hidden photo discovered · press E or tap VIEW':'Follow the floating golden glows to find hidden photos';}
+function findNear(){if(gameMode==='lobby'){let bestDoor=null,bestDistance=Infinity;for(const door of lobbyDoors){const d=Math.hypot(camera.position.x-door.x,camera.position.z-door.z);if(d<bestDistance){bestDistance=d;bestDoor=door}}near=bestDistance<3.4?bestDoor:null;$('hint').textContent=near?'RADO / ARSHA SIR MUSEUM · tap VIEW to enter':'Explore the lobby · walk to a museum entrance';return}let best=null,bestDistance=Infinity;for(const exhibit of frames){const p=new THREE.Vector3();exhibit.getWorldPosition(p);const d=camera.position.distanceTo(p);if(d<bestDistance){bestDistance=d;best=exhibit}}near=bestDistance<3.6?best:null;const secretDistance=Math.hypot(camera.position.x-2.55,camera.position.z+1.85);$('hint').textContent=secretDistance<1.8&&!secretFound?'A hidden golden secret is nearby · press E or tap VIEW':near?'Tap VIEW to see this photo':'Explore the gallery and view the photos';}
 function updateProgress(){const total=selected==='rado'?radoFiles.length:arshaFiles.length;$('progressText').textContent='COLLECTION '+visitedExhibits.size+' / '+total;$('progressFill').style.width=(visitedExhibits.size/total*100)+'%'}
 function openExhibit(index){if(!frames.length)return;currentExhibit=(index+frames.length)%frames.length;const exhibit=frames[currentExhibit];photoOpen=true;visitedExhibits.add(currentExhibit);$('photoTitle').textContent=exhibit.userData.title;$('bigPhoto').src=exhibit.userData.image;$('caption').textContent=exhibit.userData.caption;$('photoMeta').textContent='BELONGS TO: '+(selected==='rado'?'RADO':'ARSHA SIR')+'  ·  FOUND IN: GALLERY · HIDDEN SPOT '+(currentExhibit+1);$('photoCount').textContent='EXHIBIT '+(currentExhibit+1)+' OF '+frames.length;$('photoModal').style.display='flex';playExhibitVoice(exhibit.userData.voice);updateProgress();if(document.pointerLockElement)document.exitPointerLock()}
 window.changeExhibit=(step)=>{if(!photoOpen)return;openExhibit(currentExhibit+step)};
-function interact(){if(!active||photoOpen||secretOpen)return;findNear();if(gameMode==='lobby'){if(nearLobbyPhoto){const item=nearLobbyPhoto;item.found=true;item.group.visible=false;const d=item.data;photoOpen=true;$('discoveryMessage').textContent=d.who==='rado'?'Aapne Rado ki photo find kar li! Is photo ko dekhne ke liye Rado Museum ke andar jaiye.':'Aapne Arsha Sir ki photo find kar li! Is photo ko dekhne ke liye Arsha Sir Museum ke andar jaiye.';$('discoveryModal').style.display='flex';clearTimeout(discoveryTimer);discoveryTimer=setTimeout(window.closeDiscovery,2000);return}if(near)window.choose(near.who);return}const secretDistance=Math.hypot(camera.position.x-2.55,camera.position.z+1.85);if(secretDistance<1.8&&!secretFound){secretFound=true;secretOpen=true;$('secretMessage').textContent=selected==='rado'?'Rado secret unlocked: official museum rule — one more photo, always!':'Arsha Sir secret unlocked: five years of experience, unlimited legendary moments!';$('secretModal').style.display='flex';secretGem.material.emissiveIntensity=0.2;return}if(near){openExhibit(frames.indexOf(near))}else if(camera.position.z>8.5){buildLobby()}}
+function interact(){if(!active||photoOpen||secretOpen)return;findNear();if(gameMode==='lobby'){if(near)window.choose(near.who);return}const secretDistance=Math.hypot(camera.position.x-2.55,camera.position.z+1.85);if(secretDistance<1.8&&!secretFound){secretFound=true;secretOpen=true;$('secretMessage').textContent=selected==='rado'?'Rado secret unlocked: official museum rule — one more photo, always!':'Arsha Sir secret unlocked: five years of experience, unlimited legendary moments!';$('secretModal').style.display='flex';secretGem.material.emissiveIntensity=0.2;return}if(near){openExhibit(frames.indexOf(near))}else if(camera.position.z>8.5){buildLobby()}}
 window.closeSecret=()=>{secretOpen=false;$('secretModal').style.display='none'};
 window.closePhoto=()=>{voicePlayer.pause();voicePlayer.currentTime=0;$('photoModal').style.display='none';photoOpen=false};
-let discoveryTimer=null;window.closeDiscovery=()=>{clearTimeout(discoveryTimer);$('discoveryModal').style.display='none';photoOpen=false};
 const clock=new THREE.Clock();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(active&&dustParticles)dustParticles.rotation.y+=dt*.012;if(active&&!photoOpen&&!secretOpen){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-stick.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+stick.x;const len=Math.hypot(f,side)||1;f/=len;side/=len;const speed=(keys.shift?6.8:4.2)*dt;const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();camera.position.x+=(right.x*side+forward.x*f)*speed;camera.position.z+=(right.z*side+forward.z*f)*speed;camera.position.x=THREE.MathUtils.clamp(camera.position.x,gameMode==='lobby'?-9.8:-8.1,gameMode==='lobby'?9.8:8.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,gameMode==='lobby'?-8.9:-10,gameMode==='lobby'?9:10);findNear()}renderer.render(scene,camera)}
 animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.35))});
