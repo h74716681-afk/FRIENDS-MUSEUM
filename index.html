@@ -251,7 +251,7 @@ for(const x of [-7.35,7.35])for(const z of [-9.25,9.25]){
 }
 const files=selected==='rado'?radoFiles:arshaFiles,caps=selected==='rado'?radoCaps:arshaCaps,folder=selected==='rado'?'rado':'arsha';
 const loader=new THREE.TextureLoader();
-files.forEach((file,i)=>{const side=i%4,row=Math.floor(i/4),x=side===0?-8.55:side===1?8.55:(side===2?-5.4+row*3.6:5.4-row*3.6),z=side<2?-7.2+row*4.4:(side===2?-10.55:10.55);
+files.forEach((file,i)=>{const side=i%4,row=Math.floor(i/4),x=side===0?-8.72:side===1?8.72:(side===2?-5.4+row*3.6:5.4-row*3.6),z=side<2?-7.2+row*4.4:(side===2?-10.72:10.55);
 const frame=new THREE.Group();frame.position.set(x,2.65,z);if(side===0)frame.rotation.y=Math.PI/2;else if(side===1)frame.rotation.y=-Math.PI/2;else if(side===3)frame.rotation.y=Math.PI;galleryGroup.add(frame);
 const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{const source=t.image,maxSize=1024;if(source.width>maxSize||source.height>maxSize){const scale=Math.min(maxSize/source.width,maxSize/source.height),canvas=document.createElement('canvas');canvas.width=Math.round(source.width*scale);canvas.height=Math.round(source.height*scale);canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);t.image=canvas}t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;t.magFilter=THREE.LinearFilter;t.needsUpdate=true;const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
 // Lightweight photo frame: fewer layers, simpler geometry, and no shadow processing.
@@ -259,7 +259,7 @@ const outerFrame=box(frame,0,0,-.045,w+.22,h+.22,.12,darkGold);
 const innerFrame=box(frame,0,0,.015,w+.12,h+.12,.045,trim);
 for(const part of [outerFrame,innerFrame]){part.castShadow=false;part.receiveShadow=false}
 
-const photoMaterial=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),photoMaterial);image.position.z=.16;image.renderOrder=10;frame.add(image);
+const photoMaterial=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),photoMaterial);image.position.z=.025;image.renderOrder=10;frame.add(image);
 const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;image.userData.voice='assets/voices/'+encodeURIComponent(funnyVoiceFiles[selected][i]);plaque.userData.isExhibit=true;frames.push(image);
 });
 // exit portal sign
