@@ -81,9 +81,24 @@ const voiceFiles={
  rado:{entry:'assets/voices/rado_entry.mp3.m4a',correct:'assets/voices/rado_correct.mp3.m4a',wrong:'assets/voices/rado_wrong.mp3.m4a'},
  arsha:{entry:'assets/voices/arsha_entry.mp3.aac',correct:'assets/voices/arsha_correct.mp3.m4a',wrong:'assets/voices/arsha_wrong.mp3.aac'}
 };
+const funnyVoiceFiles={
+ rado:[
+ '1. rado_funny_01.mp3.m4a','2. rado_funny_02.mp3.m4a','3. rado_funny_03.mp3.m4a',
+ '4. rado_funny_04.mp3.m4a','5. rado_funny_05.mp3.m4a','6. rado_funny_06.mp3.m4a',
+ '7. rado_funny_07.mp3.m4a','8. rado_funny_08.mp3.m4a','9. rado_funny_09.mp3.m4a'
+ ],
+ arsha:[
+ '1. arsha_funny_01.mp3.m4a','2. arsha_funny_02.mp3.m4a','3. arsha_funny_03.mp3.m4a',
+ '4. arsha_funny_04.mp3.m4a','5. arsha_funny_05.mp3.m4a','6. arsha_funny_06.mp3.m4a',
+ '7. arsha_funny_07.mp3.m4a','8. arsha_funny_08.mp3.m4a','9. arsha_funny_09.mp3.m4a',
+ '10. arsha_funny_10.mp3.m4a'
+ ]
+};
 let voicePlayer=new Audio(),lastVoice='';
 function playVoice(who,event){const src=voiceFiles[who]?.[event];if(!src)return;lastVoice=src;voicePlayer.pause();voicePlayer.currentTime=0;voicePlayer.src=src;voicePlayer.load();const p=voicePlayer.play();if(p&&p.catch)p.catch(err=>console.warn('Voice playback blocked or unavailable:',src,err))}
 window.replayVoice=()=>{if(!lastVoice)return;voicePlayer.pause();voicePlayer.currentTime=0;voicePlayer.src=lastVoice;voicePlayer.play().catch(err=>console.warn('Voice replay blocked:',err))};
+function playExhibitVoice(src){if(!src)return;lastVoice=src;voicePlayer.pause();voicePlayer.currentTime=0;voicePlayer.src=src;voicePlayer.load();const p=voicePlayer.play();if(p&&p.catch)p.catch(err=>console.warn('Exhibit voice unavailable:',src,err))}
+
 window.choose=(who)=>{selected=who;$('start').style.display='none';$('lock').style.display='flex';$('lockTitle').textContent=who==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('lockSub').textContent=who==='rado'?'Har baar main kya bolti hoon?':'Mera dialogue kya hai?';$('pass').type='text';$('pass').placeholder='Apna jawab likho';$('pass').value='';$('error').textContent='';playVoice(who,'entry');$('pass').focus()};
 window.back=()=>{voicePlayer.pause();$('lock').style.display='none';$('start').style.display='flex'};
 window.unlock=()=>{const v=$('pass').value.trim();const ok=selected==='rado'?v.toLowerCase()==='aa':v.toLowerCase()==='mujhe to 5 sal ka experience he';if(!ok){$('error').textContent='Wrong pass. Try the exact phrase.';playVoice(selected,'wrong');return}playVoice(selected,'correct');$('lock').style.display='none';startMuseum()};
@@ -115,7 +130,7 @@ const frame=new THREE.Group();frame.position.set(x,2.65,z);if(side===0)frame.rot
 const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
 box(frame,0,0,-.06,w+.2,h+.2,.14,trim);box(frame,0,0,.025,w+.08,h+.08,.06,mat(0x08090d));
 const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));image.position.z=.07;frame.add(image);
-const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;plaque.userData.isExhibit=true;frames.push(image);
+const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;image.userData.voice='assets/voices/'+encodeURIComponent(funnyVoiceFiles[selected][i]);plaque.userData.isExhibit=true;frames.push(image);
 });
 // exit portal sign
 const sign=box(galleryGroup,0,4.35,10.78,3,.55,.08,mat(0x151923));sign.material=makePlaque('EXIT · RETURN TO MUSEUMS');
@@ -136,8 +151,8 @@ function stopLook(e){if(e.pointerId===lookPointer)lookPointer=null}
 renderer.domElement.addEventListener('pointerup',stopLook);renderer.domElement.addEventListener('pointercancel',stopLook);
 $('interact').onclick=interact;$('run').onpointerdown=e=>{e.preventDefault();keys.shift=true};$('run').onpointerup=()=>keys.shift=false;$('run').onpointercancel=()=>keys.shift=false;
 function findNear(){let best=null,bestDistance=Infinity;for(const exhibit of frames){const p=new THREE.Vector3();exhibit.getWorldPosition(p);const d=camera.position.distanceTo(p);if(d<bestDistance){bestDistance=d;best=exhibit}}near=bestDistance<3.6?best:null;$('hint').textContent=near?'Nearby exhibit · press E or tap VIEW':'Explore the gallery · walk close to a photo to view';}
-function interact(){if(!active||photoOpen)return;findNear();if(near){photoOpen=true;$('photoTitle').textContent=near.userData.title;$('bigPhoto').src=near.userData.image;$('caption').textContent=near.userData.caption;$('photoModal').style.display='flex';if(document.pointerLockElement)document.exitPointerLock()}else if(camera.position.z>8.5){active=false;$('hud').style.display='none';$('hint').style.display='none';$('start').style.display='flex'}}
-window.closePhoto=()=>{$('photoModal').style.display='none';photoOpen=false};
+function interact(){if(!active||photoOpen)return;findNear();if(near){photoOpen=true;$('photoTitle').textContent=near.userData.title;$('bigPhoto').src=near.userData.image;$('caption').textContent=near.userData.caption;$('photoModal').style.display='flex';playExhibitVoice(near.userData.voice);if(document.pointerLockElement)document.exitPointerLock()}else if(camera.position.z>8.5){active=false;$('hud').style.display='none';$('hint').style.display='none';$('start').style.display='flex'}}
+window.closePhoto=()=>{voicePlayer.pause();voicePlayer.currentTime=0;$('photoModal').style.display='none';photoOpen=false};
 const clock=new THREE.Clock();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(active&&!photoOpen){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-stick.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+stick.x;const len=Math.hypot(f,side)||1;f/=len;side/=len;const speed=(keys.shift?6.8:4.2)*dt;const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();camera.position.x+=(right.x*side+forward.x*f)*speed;camera.position.z+=(right.z*side+forward.z*f)*speed;camera.position.x=THREE.MathUtils.clamp(camera.position.x,-8.1,8.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-10,10);findNear()}renderer.render(scene,camera)}
 animate();window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7))});
