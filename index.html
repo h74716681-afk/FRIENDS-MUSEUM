@@ -32,6 +32,27 @@ button{border:1px solid var(--gold);background:linear-gradient(135deg,#b68b45,#7
 #photoModal .panel{max-height:92vh;overflow:auto}
 #bigPhoto{max-width:100%;max-height:58vh;object-fit:contain;border:8px solid #c6a66b;background:#111}
 #caption{font-size:18px;color:#f4dba8}
+#start .panel{position:relative;overflow:hidden;border-radius:24px;background:linear-gradient(145deg,rgba(22,25,37,.97),rgba(7,11,19,.96));box-shadow:0 25px 100px #000,0 0 45px #d8b46b18}
+#start .panel:before{content:"";position:absolute;inset:10px;border:1px solid #d8b46b35;border-radius:17px;pointer-events:none}
+#start h1{font-size:clamp(42px,9vw,76px);line-height:.96;letter-spacing:.055em;text-shadow:0 4px 28px #d8b46b40}
+#start .museum{min-height:116px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;background:linear-gradient(145deg,#343044,#151a27)}
+#start .museum:after{content:"";position:absolute;inset:auto 12% 0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+#start .museum:active{transform:scale(.98)}
+#start .museum small{line-height:1.6}
+#progressWrap{position:fixed;z-index:3;top:62px;left:14px;width:min(210px,48vw);display:none;color:#f5e5c4;font:10px Arial;letter-spacing:.12em;text-shadow:0 2px 4px #000}
+#progressTrack{height:5px;background:#ffffff35;border-radius:9px;margin-top:7px;overflow:hidden}
+#progressFill{height:100%;width:0;background:linear-gradient(90deg,#9e7138,#ffe2a1);transition:width .25s}
+#hint{max-width:calc(100vw - 28px);text-align:center;border:1px solid #d8b46b66;box-shadow:0 8px 28px #0008}
+#photoModal .panel{border-radius:22px;background:linear-gradient(145deg,rgba(25,25,32,.98),rgba(7,10,17,.98));border:1px solid #e3c27d;box-shadow:0 24px 90px #000,0 0 36px #d8b46b20}
+#bigPhoto{border:7px solid #b99559;box-shadow:0 12px 34px #0009;border-radius:5px}
+.modalActions{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.modalActions button{min-width:112px}
+#photoCount{font:11px Arial;letter-spacing:.16em;color:#d8b46b;margin:10px 0}
+button:focus-visible,.museum:focus-visible,input:focus-visible{outline:3px solid #ffe2a1;outline-offset:3px}
+button{transition:filter .18s,transform .18s}
+button:active{filter:brightness(1.15);transform:translateY(1px)}
+@media(max-width:520px){#hud{top:8px;left:8px;right:8px}#hud span{font-size:10px;padding:8px}#progressWrap{top:52px;left:9px}.modalActions button{flex:1;min-width:0;padding:12px 8px}#photoModal .panel{padding:18px 14px}#bigPhoto{max-height:48vh}}
+
 @media(pointer:coarse){#touch{display:block}}
 @media(max-width:520px){.museums{grid-template-columns:1fr}.panel{padding:22px 18px}.museum{padding:13px}}
 </style>
@@ -44,10 +65,10 @@ button{border:1px solid var(--gold);background:linear-gradient(135deg,#b68b45,#7
 <button class="museum" onclick="choose('arsha')">ARSHA SIR MUSEUM<small>ENTER WITH SIR'S PASS</small></button>
 </div><p style="font-size:11px;margin-top:24px">3D WALKTHROUGH · TOUCH · KEYBOARD & MOUSE</p></div></div>
 <div id="lock" class="overlay" style="display:none"><div class="panel"><div class="kicker">Restricted gallery</div><h1 id="lockTitle">Museum pass</h1><p id="lockSub">Enter the museum's secret passphrase.</p><input id="pass" type="password" placeholder="Enter passphrase" autocomplete="off"><div id="error"></div><button onclick="replayVoice()">REPLAY VOICE</button><button onclick="unlock()">UNLOCK MUSEUM</button><button class="secondary" onclick="back()">BACK</button></div></div>
-<div id="hud"><span id="museumName">MUSEUM</span><span>WASD / JOYSTICK · E / VIEW NEARBY PHOTO</span></div>
+<div id="hud"><span id="museumName">MUSEUM</span><span>WALK · LOOK · DISCOVER</span></div><div id="progressWrap"><span id="progressText">COLLECTION 0 / 9</span><div id="progressTrack"><div id="progressFill"></div></div></div>
 <div id="hint">Press E or tap INTERACT to view this photograph</div>
 <div id="touch"><div id="stick"><div id="nub"></div></div><div id="actions"><button id="interact">VIEW</button><button id="run">RUN</button></div><div id="looklabel">DRAG RIGHT SIDE TO LOOK</div></div>
-<div id="photoModal" class="overlay"><div class="panel"><div class="kicker">Exhibition portrait</div><h1 id="photoTitle" style="font-size:30px">Photo</h1><img id="bigPhoto"><div class="kicker" style="margin-top:18px">Exhibit story</div><p id="caption"></p><button onclick="replayVoice()">REPLAY FUNNY VOICE</button><button class="secondary" onclick="closePhoto()">BACK TO GALLERY</button></div></div>
+<div id="photoModal" class="overlay"><div class="panel"><div class="kicker">Museum archive · original voice recording</div><h1 id="photoTitle" style="font-size:30px">Photo</h1><img id="bigPhoto"><div id="photoCount">EXHIBIT 1</div><div class="kicker" style="margin-top:12px">Exhibit story</div><p id="caption"></p><div class="modalActions"><button class="secondary" onclick="changeExhibit(-1)">PREVIOUS</button><button onclick="replayVoice()">REPLAY VOICE</button><button class="secondary" onclick="changeExhibit(1)">NEXT</button></div><button class="secondary" style="margin-top:12px" onclick="closePhoto()">BACK TO GALLERY</button></div></div>
 <script type="module">
 import * as THREE from 'three';
 const radoFiles=['rado_01.jpg','rado_02.png','rado_03.png','rado_04.png','rado_05.png','rado_06.png','rado_07.jpg','rado_08.png','rado_09.jpg'];
@@ -76,7 +97,7 @@ const arshaCaps=[
 'Final exhibit: proof that experience also knows how to pose.'
 ];
 const $=id=>document.getElementById(id);
-let selected='rado',active=false,near=null,photoOpen=false;
+let selected='rado',active=false,near=null,photoOpen=false,currentExhibit=0;const visitedExhibits=new Set();
 const voiceFiles={
  rado:{entry:'assets/voices/rado_entry.mp3.m4a',correct:'assets/voices/rado_correct.mp3.m4a',wrong:'assets/voices/rado_wrong.mp3.m4a'},
  arsha:{entry:'assets/voices/arsha_entry.mp3.aac',correct:'assets/voices/arsha_correct.mp3.m4a',wrong:'assets/voices/arsha_wrong.mp3.aac'}
@@ -114,7 +135,7 @@ const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,meta
 function box(parent,x,y,z,sx,sy,sz,material){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
 function makePlaque(text){const c=document.createElement('canvas');c.width=512;c.height=160;const x=c.getContext('2d');x.fillStyle='#191710';x.fillRect(0,0,512,160);x.strokeStyle='#c9a45f';x.lineWidth=5;x.strokeRect(5,5,502,150);x.fillStyle='#f3dfb6';x.textAlign='center';x.font='22px Georgia';const words=text.split(' ');let lines=[''];for(const word of words){const n=(lines[lines.length-1]+' '+word).trim();if(x.measureText(n).width>460&&lines.length<2)lines.push(word);else lines[lines.length-1]=n}if(lines.length>2)lines[1]=lines[1].slice(0,35)+'…';x.fillText(lines[0],256,68);if(lines[1])x.fillText(lines[1],256,108);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:t})}
 let frames=[];
-function startMuseum(){active=true;photoOpen=false;galleryGroup.clear();frames=[];camera.position.set(0,1.65,8);yaw=0;pitch=0;camera.rotation.set(0,0,0);$('hud').style.display='flex';$('museumName').textContent=selected==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('hint').style.display='block';
+function startMuseum(){active=true;photoOpen=false;galleryGroup.clear();frames=[];visitedExhibits.clear();updateProgress();camera.position.set(0,1.65,8);yaw=0;pitch=0;camera.rotation.set(0,0,0);$('hud').style.display='flex';$('progressWrap').style.display='block';$('museumName').textContent=selected==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('hint').style.display='block';
 const wall=mat(selected==='rado'?0x29243a:0x2d2921),floor=mat(0x48444a,.24,.28),ceiling=mat(0x171b26),trim=mat(0xb18b50,.32,.55);
 box(galleryGroup,0,-.18,0,18,.35,22,floor);box(galleryGroup,0,5.1,0,18,.25,22,ceiling);
 box(galleryGroup,0,2.45,-11,18,5,0.35,wall);box(galleryGroup,-9,2.45,0,.35,5,22,wall);box(galleryGroup,9,2.45,0,.35,5,22,wall);
@@ -227,7 +248,10 @@ function stopLook(e){if(e.pointerId===lookPointer)lookPointer=null}
 renderer.domElement.addEventListener('pointerup',stopLook);renderer.domElement.addEventListener('pointercancel',stopLook);
 $('interact').onclick=interact;$('run').onpointerdown=e=>{e.preventDefault();keys.shift=true};$('run').onpointerup=()=>keys.shift=false;$('run').onpointercancel=()=>keys.shift=false;
 function findNear(){let best=null,bestDistance=Infinity;for(const exhibit of frames){const p=new THREE.Vector3();exhibit.getWorldPosition(p);const d=camera.position.distanceTo(p);if(d<bestDistance){bestDistance=d;best=exhibit}}near=bestDistance<3.6?best:null;$('hint').textContent=near?'Nearby exhibit · press E or tap VIEW':'Explore the gallery · walk close to a photo to view';}
-function interact(){if(!active||photoOpen)return;findNear();if(near){photoOpen=true;$('photoTitle').textContent=near.userData.title;$('bigPhoto').src=near.userData.image;$('caption').textContent=near.userData.caption;$('photoModal').style.display='flex';playExhibitVoice(near.userData.voice);if(document.pointerLockElement)document.exitPointerLock()}else if(camera.position.z>8.5){active=false;$('hud').style.display='none';$('hint').style.display='none';$('start').style.display='flex'}}
+function updateProgress(){const total=selected==='rado'?radoFiles.length:arshaFiles.length;$('progressText').textContent='COLLECTION '+visitedExhibits.size+' / '+total;$('progressFill').style.width=(visitedExhibits.size/total*100)+'%'}
+function openExhibit(index){if(!frames.length)return;currentExhibit=(index+frames.length)%frames.length;const exhibit=frames[currentExhibit];photoOpen=true;visitedExhibits.add(currentExhibit);$('photoTitle').textContent=exhibit.userData.title;$('bigPhoto').src=exhibit.userData.image;$('caption').textContent=exhibit.userData.caption;$('photoCount').textContent='EXHIBIT '+(currentExhibit+1)+' OF '+frames.length;$('photoModal').style.display='flex';playExhibitVoice(exhibit.userData.voice);updateProgress();if(document.pointerLockElement)document.exitPointerLock()}
+window.changeExhibit=(step)=>{if(!photoOpen)return;openExhibit(currentExhibit+step)};
+function interact(){if(!active||photoOpen)return;findNear();if(near){openExhibit(frames.indexOf(near))}else if(camera.position.z>8.5){active=false;$('hud').style.display='none';$('progressWrap').style.display='none';$('hint').style.display='none';$('start').style.display='flex'}}
 window.closePhoto=()=>{voicePlayer.pause();voicePlayer.currentTime=0;$('photoModal').style.display='none';photoOpen=false};
 const clock=new THREE.Clock();
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);if(active&&!photoOpen){camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);let f=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)-stick.y;let side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0)+stick.x;const len=Math.hypot(f,side)||1;f/=len;side/=len;const speed=(keys.shift?6.8:4.2)*dt;const forward=new THREE.Vector3();camera.getWorldDirection(forward);forward.y=0;forward.normalize();const right=new THREE.Vector3().crossVectors(forward,new THREE.Vector3(0,1,0)).normalize();camera.position.x+=(right.x*side+forward.x*f)*speed;camera.position.z+=(right.z*side+forward.z*f)*speed;camera.position.x=THREE.MathUtils.clamp(camera.position.x,-8.1,8.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-10,10);findNear()}renderer.render(scene,camera)}
