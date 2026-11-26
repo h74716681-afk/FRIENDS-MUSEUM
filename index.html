@@ -126,17 +126,27 @@ window.unlock=()=>{const v=$('pass').value.trim();const ok=selected==='rado'?v.t
 $('pass').addEventListener('keydown',e=>{if(e.key==='Enter')window.unlock()});
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x111521);scene.fog=new THREE.Fog(0x111521,15,42);
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,100);camera.position.set(0,1.65,8);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;$('game').appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;$('game').appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xb8c9ed,0x35251a,1.35));
 const key=new THREE.DirectionalLight(0xffdfad,2.1);key.position.set(-4,9,6);key.castShadow=true;scene.add(key);
 const ambient=new THREE.PointLight(0xd9b66f,1.2,30);ambient.position.set(0,4,0);scene.add(ambient);
 let galleryGroup=new THREE.Group();scene.add(galleryGroup);
 const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+function proceduralSurface(base,vein,kind){
+ const c=document.createElement('canvas');c.width=512;c.height=512;const g=c.getContext('2d');
+ g.fillStyle=base;g.fillRect(0,0,512,512);let seed=kind==='stone'?37:91;
+ const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ for(let i=0;i<15000;i++){const a=rnd();g.fillStyle='rgba(255,255,255,'+(a*.035)+')';g.fillRect(rnd()*512,rnd()*512,1+rnd()*2,1+rnd()*2)}
+ if(kind==='stone'){for(let i=0;i<18;i++){g.beginPath();let x=rnd()*512,y=rnd()*512;g.moveTo(x,y);for(let j=0;j<7;j++){x+=rnd()*90-35;y+=rnd()*55-25;g.lineTo(x,y)}g.strokeStyle=vein;g.globalAlpha=.08+rnd()*.13;g.lineWidth=1+rnd()*2;g.stroke()}g.globalAlpha=1}
+ else{for(let y=0;y<512;y+=4){g.fillStyle='rgba(0,0,0,.025)';g.fillRect(0,y,512,1)}}
+ const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;
+}
+
 function box(parent,x,y,z,sx,sy,sz,material){const o=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
 function makePlaque(text){const c=document.createElement('canvas');c.width=512;c.height=160;const x=c.getContext('2d');x.fillStyle='#191710';x.fillRect(0,0,512,160);x.strokeStyle='#c9a45f';x.lineWidth=5;x.strokeRect(5,5,502,150);x.fillStyle='#f3dfb6';x.textAlign='center';x.font='22px Georgia';const words=text.split(' ');let lines=[''];for(const word of words){const n=(lines[lines.length-1]+' '+word).trim();if(x.measureText(n).width>460&&lines.length<2)lines.push(word);else lines[lines.length-1]=n}if(lines.length>2)lines[1]=lines[1].slice(0,35)+'…';x.fillText(lines[0],256,68);if(lines[1])x.fillText(lines[1],256,108);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return new THREE.MeshBasicMaterial({map:t})}
 let frames=[];
 function startMuseum(){active=true;photoOpen=false;galleryGroup.clear();frames=[];visitedExhibits.clear();updateProgress();camera.position.set(0,1.65,8);yaw=0;pitch=0;camera.rotation.set(0,0,0);$('hud').style.display='flex';$('progressWrap').style.display='block';$('museumName').textContent=selected==='rado'?'RADO MUSEUM':'ARSHA SIR MUSEUM';$('hint').style.display='block';
-const wall=mat(selected==='rado'?0x29243a:0x2d2921),floor=mat(0x48444a,.24,.28),ceiling=mat(0x171b26),trim=mat(0xb18b50,.32,.55);
+const wall=mat(selected==='rado'?0x29243a:0x2d2921),floor=mat(0x48444a,.24,.28),ceiling=mat(0x171b26),trim=mat(0xb18b50,.32,.55);const marbleMap=proceduralSurface('#77716d','rgba(238,222,194,.9)','stone');marbleMap.repeat.set(3,4);floor.map=marbleMap;floor.roughness=.32;floor.metalness=.12;const wallMap=proceduralSurface(selected==='rado'?'#29243a':'#302b24','#ffffff','wall');wallMap.repeat.set(2,2);wall.map=wallMap;wall.roughness=.88;
 box(galleryGroup,0,-.18,0,18,.35,22,floor);box(galleryGroup,0,5.1,0,18,.25,22,ceiling);
 box(galleryGroup,0,2.45,-11,18,5,0.35,wall);box(galleryGroup,-9,2.45,0,.35,5,22,wall);box(galleryGroup,9,2.45,0,.35,5,22,wall);
 box(galleryGroup,0,0.02,-10.78,18,.08,.12,trim);box(galleryGroup,0,4.85,-10.78,18,.08,.12,trim);
@@ -168,6 +178,31 @@ for(const side of [-1,1])for(const z of [-5.2,3.8]){
  const lamp=new THREE.PointLight(0xffc77a,18,7,2);lamp.position.set(side*8.1,3.45,z);galleryGroup.add(lamp);
 }
 // Decorative planters in the gallery corners
+
+// Architectural realism: layered skirting, crown moulding and recessed ceiling perimeter
+const stoneTrim=mat(0x75634d,.58,.18),darkInset=mat(0x171923,.9,0);
+for(const side of [-1,1]){box(galleryGroup,side*8.72,.18,0,.12,.28,20,stoneTrim);box(galleryGroup,side*8.72,4.72,0,.16,.18,20,lightGold);box(galleryGroup,side*8.68,4.58,0,.12,.08,20,darkInset)}
+box(galleryGroup,0,.18,-10.72,17.8,.28,.12,stoneTrim);box(galleryGroup,0,4.72,-10.72,17.8,.18,.12,lightGold);
+// Recessed framed wall panels
+for(const side of [-1,1])for(const z of [-7.3,-2.5,2.5,7.3]){
+ box(galleryGroup,side*8.79,2.25,z,.045,2.45,3.65,darkInset);const rail=mat(0x80643f,.5,.3);
+ box(galleryGroup,side*8.73,1.02,z,.06,.045,3.7,rail);box(galleryGroup,side*8.73,3.48,z,.06,.045,3.7,rail);
+ box(galleryGroup,side*8.73,2.25,z-1.82,.06,2.5,.045,rail);box(galleryGroup,side*8.73,2.25,z+1.82,.06,2.5,.045,rail);
+}
+// Picture-light fixtures above portrait bays
+const pictureGold=mat(0x9e7943,.28,.72);
+for(const side of [-1,1])for(const z of [-7.2,-2.8,1.6,6]){
+ const x=side*8.22;const arm=box(galleryGroup,x,4.02,z,.055,.48,.055,pictureGold);arm.rotation.x=.22;
+ const hood=new THREE.Mesh(new THREE.CylinderGeometry(.11,.19,.16,12),pictureGold);hood.position.set(x,3.78,z);hood.rotation.x=Math.PI/2;galleryGroup.add(hood);
+ const lens=new THREE.Mesh(new THREE.CircleGeometry(.115,16),glowMat);lens.position.set(x,3.69,z);lens.rotation.x=-Math.PI/2;galleryGroup.add(lens);
+}
+// Upholstered viewing benches outside the central walking line
+function makeBench(x,z){const wood=mat(0x49352b,.42,.16),velvet=mat(0x34202b,.92,0);box(galleryGroup,x,.48,z,2.15,.22,.62,velvet);box(galleryGroup,x,.34,z,2.28,.08,.7,wood);for(const dx of [-.88,.88])for(const dz of [-.22,.22])box(galleryGroup,x+dx,.16,z+dz,.075,.34,.075,pictureGold)}
+makeBench(-3.9,1.8);makeBench(3.9,1.8);
+// Brass entrance stanchions with a velvet rope
+for(const x of [-1.65,1.65]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.075,.11,.92,14),pictureGold);post.position.set(x,.46,8.2);galleryGroup.add(post);const cap=new THREE.Mesh(new THREE.SphereGeometry(.12,12,10),lightGold);cap.position.set(x,.96,8.2);galleryGroup.add(cap)}
+const rope=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,3.3,8),mat(0x542632,.8,0));rope.rotation.z=Math.PI/2;rope.position.set(0,.76,8.2);galleryGroup.add(rope);
+
 // Architectural coffered ceiling with recessed gold ribs
 const beamMat=mat(0x39313a,.42,.35),edgeGlow=new THREE.MeshBasicMaterial({color:0xe0bd78});
 for(const z of [-9,-5.5,-2,2,5.5,9]){
