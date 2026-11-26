@@ -123,6 +123,35 @@ for(let z=-7;z<=7;z+=7){box(galleryGroup,-8.78,2.5,z,.12,5,.12,trim);box(gallery
 // central display island and gold-accented columns
 box(galleryGroup,0,.38,0,4,.5,3,mat(0x24222b));box(galleryGroup,0,.66,0,4.15,.08,3.15,trim);
 for(const x of [-7.8,7.8])for(const z of [-8,0,8]){const col=box(galleryGroup,x,2.45,z,.24,4.9,.24,trim);col.material=mat(0x9c7945,.4,.55)}
+// Premium ceiling lights: glowing fixtures with a small number of real lights for mobile performance
+const glowMat=new THREE.MeshStandardMaterial({color:0xffe2a1,emissive:0xffc45c,emissiveIntensity:2.2,roughness:.25});
+const darkGold=mat(0x76552d,.32,.7),lightGold=mat(0xd7b46d,.28,.65);
+for(const x of [-5.8,0,5.8])for(const z of [-6,1,7]){
+ const fixture=new THREE.Group();fixture.position.set(x,4.88,z);galleryGroup.add(fixture);
+ const base=new THREE.Mesh(new THREE.CylinderGeometry(.32,.42,.12,20),darkGold);fixture.add(base);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(.48,.035,8,28),lightGold);ring.rotation.x=Math.PI/2;ring.position.y=-.08;fixture.add(ring);
+ const panel=new THREE.Mesh(new THREE.BoxGeometry(.58,.045,.58),glowMat);panel.position.y=-.1;fixture.add(panel);
+ if((x===-5.8||x===5.8)&&(z===-6||z===7)){const lamp=new THREE.PointLight(0xffd28a,32,12,2);lamp.position.set(x,4.25,z);galleryGroup.add(lamp)}
+}
+// Gold inlay lines and a central floor medallion
+for(const z of [-9,-6,-3,3,6,9])box(galleryGroup,0,.002,z,16,.018,.025,lightGold);
+for(const x of [-7,-4,4,7])box(galleryGroup,x,.003,0,.025,.018,18,lightGold);
+const medallion=new THREE.Mesh(new THREE.TorusGeometry(1.35,.035,8,64),lightGold);medallion.rotation.x=Math.PI/2;medallion.position.set(0,.045,0);galleryGroup.add(medallion);
+const medallionInner=new THREE.Mesh(new THREE.TorusGeometry(.92,.018,8,64),darkGold);medallionInner.rotation.x=Math.PI/2;medallionInner.position.set(0,.047,0);galleryGroup.add(medallionInner);
+// Wall sconces with warm glowing bulbs
+for(const side of [-1,1])for(const z of [-5.2,3.8]){
+ const sconce=new THREE.Group();sconce.position.set(side*8.72,3.65,z);sconce.rotation.y=side===-1?Math.PI/2:-Math.PI/2;galleryGroup.add(sconce);
+ const arm=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.38,8),darkGold);arm.rotation.x=Math.PI/2;arm.position.z=.13;sconce.add(arm);
+ const shade=new THREE.Mesh(new THREE.ConeGeometry(.2,.28,12,1,true),lightGold);shade.position.set(0,-.12,.27);sconce.add(shade);
+ const bulb=new THREE.Mesh(new THREE.SphereGeometry(.09,12,10),glowMat);bulb.position.set(0,-.25,.27);sconce.add(bulb);
+ const lamp=new THREE.PointLight(0xffc77a,18,7,2);lamp.position.set(side*8.1,3.45,z);galleryGroup.add(lamp);
+}
+// Decorative planters in the gallery corners
+for(const x of [-7.35,7.35])for(const z of [-9.25,9.25]){
+ const pot=new THREE.Mesh(new THREE.CylinderGeometry(.28,.22,.48,16),mat(0x49352c,.65));pot.position.set(x,.12,z);galleryGroup.add(pot);
+ const rim=new THREE.Mesh(new THREE.TorusGeometry(.26,.035,8,20),lightGold);rim.rotation.x=Math.PI/2;rim.position.set(x,.34,z);galleryGroup.add(rim);
+ for(let j=0;j<5;j++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.13,.95,8),mat(j%2?0x315b42:0x47734d,.8));leaf.position.set(x+Math.cos(j*1.256)*.16,.72,z+Math.sin(j*1.256)*.16);leaf.rotation.z=(j-2)*.13;galleryGroup.add(leaf)}
+}
 const files=selected==='rado'?radoFiles:arshaFiles,caps=selected==='rado'?radoCaps:arshaCaps,folder=selected==='rado'?'rado':'arsha';
 const loader=new THREE.TextureLoader();
 files.forEach((file,i)=>{const side=i%4,row=Math.floor(i/4),x=side===0?-8.55:side===1?8.55:(side===2?-5.4+row*3.6:5.4-row*3.6),z=side<2?-7.2+row*4.4:(side===2?-10.55:10.55);
