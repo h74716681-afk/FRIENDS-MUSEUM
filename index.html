@@ -389,6 +389,7 @@ for(const x of [-7.35,7.35])for(const z of [-9.25,9.25]){
 }
 const files=selected==='rado'?radoFiles:arshaFiles,caps=selected==='rado'?radoCaps:arshaCaps,folder=selected==='rado'?'rado':'arsha';
 const randomGallerySpots=[[-6.3,-7.2],[6.2,-6.4],[-3.8,-5.1],[4.5,-3.9],[-6.5,.6],[6.1,1.8],[-4.6,5.7],[4.7,6.4],[-1.9,7.6],[1.9,-8.5]];
+randomGallerySpots.sort(()=>Math.random()-.5);
 const loader=new THREE.TextureLoader();
 files.forEach((file,i)=>{const [x,z]=randomGallerySpots[i%randomGallerySpots.length];
 const frame=new THREE.Group();frame.position.set(x,1.95,z);frame.rotation.y=Math.atan2(-x,-z);galleryGroup.add(frame);
