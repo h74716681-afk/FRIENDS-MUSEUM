@@ -371,11 +371,15 @@ for(const x of [-7.35,7.35])for(const z of [-9.25,9.25]){
  for(let j=0;j<5;j++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.13,.95,8),mat(j%2?0x315b42:0x47734d,.8));leaf.position.set(x+Math.cos(j*1.256)*.16,.72,z+Math.sin(j*1.256)*.16);leaf.rotation.z=(j-2)*.13;galleryGroup.add(leaf)}
 }
 const files=selected==='rado'?radoFiles:arshaFiles,caps=selected==='rado'?radoCaps:arshaCaps,folder=selected==='rado'?'rado':'arsha';
-const randomGallerySpots=[[-6.3,-7.2],[6.2,-6.4],[-3.8,-5.1],[4.5,-3.9],[-6.5,.6],[6.1,1.8],[-4.6,5.7],[4.7,6.4],[-1.9,7.6],[1.9,-8.5]];
+const randomGallerySpots=[
+ {x:-8.78,z:-7.2,rotation:Math.PI/2},{x:-8.78,z:-2.8,rotation:Math.PI/2},{x:-8.78,z:2.8,rotation:Math.PI/2},{x:-8.78,z:7.2,rotation:Math.PI/2},
+ {x:8.78,z:-7.2,rotation:-Math.PI/2},{x:8.78,z:-2.8,rotation:-Math.PI/2},{x:8.78,z:2.8,rotation:-Math.PI/2},{x:8.78,z:7.2,rotation:-Math.PI/2},
+ {x:-3.4,z:-10.78,rotation:0},{x:3.4,z:-10.78,rotation:0}
+];
 randomGallerySpots.sort(()=>Math.random()-.5);
 const loader=new THREE.TextureLoader();
-files.forEach((file,i)=>{const [x,z]=randomGallerySpots[i%randomGallerySpots.length];
-const frame=new THREE.Group();frame.position.set(x,1.95,z);frame.rotation.y=Math.atan2(-x,-z);galleryGroup.add(frame);
+files.forEach((file,i)=>{const spot=randomGallerySpots[i%randomGallerySpots.length];const {x,z,rotation}=spot;
+const frame=new THREE.Group();frame.position.set(x,2.45,z);frame.rotation.y=rotation;galleryGroup.add(frame);
 const w=1.85,h=2.25;const imageUrl=`assets/${folder}/${file}`;const tex=loader.load(imageUrl,t=>{const source=t.image,maxSize=1024;if(source.width>maxSize||source.height>maxSize){const scale=Math.min(maxSize/source.width,maxSize/source.height),canvas=document.createElement('canvas');canvas.width=Math.round(source.width*scale);canvas.height=Math.round(source.height*scale);canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);t.image=canvas}t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;t.magFilter=THREE.LinearFilter;t.needsUpdate=true;const aspect=t.image.width/t.image.height;if(aspect>w/h)image.scale.set(1,(w/aspect)/h,1);else image.scale.set((h*aspect)/w,1,1);image.material.needsUpdate=true},undefined,err=>console.warn('Photo failed to load:',imageUrl,err));
 // Lightweight photo frame: fewer layers, simpler geometry, and no shadow processing.
 const outerFrame=box(frame,0,0,-.045,w+.22,h+.22,.12,darkGold);
