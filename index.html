@@ -131,7 +131,64 @@ const key=new THREE.DirectionalLight(0xffdfad,2.1);key.position.set(-4,9,6);key.
 const ambient=new THREE.PointLight(0xd9b66f,1.2,30);ambient.position.set(0,4,0);scene.add(ambient);
 let galleryGroup=new THREE.Group();scene.add(galleryGroup);let dustParticles=null;
 const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
-function buildLobby(){galleryGroup.visible=false;if(lobbyGroup){scene.remove(lobbyGroup);lobbyGroup=null}lobbyDoors=[];lobbyGroup=new THREE.Group();scene.add(lobbyGroup);const stone=mat(0x383642,.32,.2),wall=mat(0x252633,.86),gold=mat(0xb18b50,.32,.6),dark=mat(0x111521,.5,.25);box(lobbyGroup,0,-.2,0,22,.4,20,stone);box(lobbyGroup,0,5.4,0,22,.3,20,wall);box(lobbyGroup,-11,2.6,0,.35,5.2,20,wall);box(lobbyGroup,11,2.6,0,.35,5.2,20,wall);box(lobbyGroup,-8.5,2.6,-9.8,5,5.2,.35,wall);box(lobbyGroup,0,2.6,-9.8,4,5.2,.35,wall);box(lobbyGroup,8.5,2.6,-9.8,5,5.2,.35,wall);box(lobbyGroup,-4,4.95,-9.8,4,.7,.35,wall);box(lobbyGroup,4,4.95,-9.8,4,.7,.35,wall);box(lobbyGroup,0,2.5,9.8,22,5,.35,wall);for(const [x,who,label] of [[-4,'rado','RADO MUSEUM'],[4,'arsha','ARSHA SIR MUSEUM']]){box(lobbyGroup,x-1.9,2.35,-9.55,.18,4.7,.55,gold);box(lobbyGroup,x+1.9,2.35,-9.55,.18,4.7,.55,gold);box(lobbyGroup,x,4.72,-9.55,4,.18,.55,gold);box(lobbyGroup,x,2.35,-9.35,3.55,4.35,.12,dark);const plaque=box(lobbyGroup,x,5.05,-9.45,3.8,.55,.16,gold);plaque.material=makePlaque(label);lobbyDoors.push({who,x,z:-8.4})}const title=box(lobbyGroup,0,4.25,9.58,7,1.25,.16,dark);title.material=makePlaque('WELCOME TO FRIENDS MUSEUM');for(const x of [-8,-4,0,4,8]){const col=box(lobbyGroup,x,2.45,7.8,.22,4.9,.22,gold);col.castShadow=false}camera.position.set(0,1.65,6.5);yaw=0;pitch=0;camera.rotation.set(0,0,0);gameMode='lobby';active=true;near=null;$('start').style.display='none';$('lock').style.display='none';$('hud').style.display='flex';$('museumName').textContent='MAIN LOBBY';$('progressWrap').style.display='none';$('hint').style.display='block';$('hint').textContent='Walk to Rado Museum or Arsha Sir Museum and tap VIEW';}
+function buildLobby(){
+ galleryGroup.visible=false;
+ if(lobbyGroup){scene.remove(lobbyGroup);lobbyGroup=null}
+ lobbyDoors=[];
+ lobbyGroup=new THREE.Group();scene.add(lobbyGroup);
+ const stone=mat(0x383642,.32,.2),wall=mat(0x252633,.86),gold=mat(0xb18b50,.32,.6),dark=mat(0x111521,.5,.25),cream=mat(0x9b8b70,.58,.12);
+ // Grand lobby shell with two clear, open museum entrances.
+ box(lobbyGroup,0,-.2,0,22,.4,20,stone);box(lobbyGroup,0,5.4,0,22,.3,20,wall);
+ box(lobbyGroup,-11,2.6,0,.35,5.2,20,wall);box(lobbyGroup,11,2.6,0,.35,5.2,20,wall);
+ box(lobbyGroup,-8.5,2.6,-9.8,5,5.2,.35,wall);box(lobbyGroup,0,2.6,-9.8,4,5.2,.35,wall);box(lobbyGroup,8.5,2.6,-9.8,5,5.2,.35,wall);
+ box(lobbyGroup,-4,4.95,-9.8,4,.7,.35,wall);box(lobbyGroup,4,4.95,-9.8,4,.7,.35,wall);box(lobbyGroup,0,2.5,9.8,22,5,.35,wall);
+ // Layered skirting, cornices and a polished floor pattern.
+ for(const z of [-9.55,9.55]){box(lobbyGroup,0,.12,z,21.5,.22,.12,gold);box(lobbyGroup,0,5.08,z,21.5,.16,.16,gold)}
+ for(const x of [-10.7,10.7]){box(lobbyGroup,x,.12,0,.12,.22,19.2,gold);box(lobbyGroup,x,5.08,0,.16,.16,19.2,gold)}
+ for(const z of [-7,-4,-1,2,5,8])box(lobbyGroup,0,.012,z,20,.018,.025,cream);
+ for(const x of [-9,-6,6,9])box(lobbyGroup,x,.014,0,.025,.018,18,cream);
+ const med=new THREE.Mesh(new THREE.TorusGeometry(2.25,.045,8,64),gold);med.rotation.x=Math.PI/2;med.position.set(0,.035,0);lobbyGroup.add(med);
+ const med2=new THREE.Mesh(new THREE.TorusGeometry(1.72,.022,6,56),cream);med2.rotation.x=Math.PI/2;med2.position.set(0,.04,0);lobbyGroup.add(med2);
+ // Two distinct, illuminated entrance portals and readable signs.
+ for(const [x,who,label,accent] of [[-4,'rado','RADO MUSEUM',0xd9a5bd],[4,'arsha','ARSHA SIR MUSEUM',0x9ec5e4]]){
+  const accentMat=new THREE.MeshStandardMaterial({color:accent,emissive:accent,emissiveIntensity:.32,metalness:.35,roughness:.3});
+  box(lobbyGroup,x-1.9,2.35,-9.55,.18,4.7,.55,gold);box(lobbyGroup,x+1.9,2.35,-9.55,.18,4.7,.55,gold);box(lobbyGroup,x,4.72,-9.55,4,.18,.55,gold);
+  box(lobbyGroup,x,2.35,-9.35,3.55,4.35,.12,dark);
+  const portal=new THREE.Mesh(new THREE.TorusGeometry(1.82,.055,8,48),accentMat);portal.position.set(x,2.25,-9.22);lobbyGroup.add(portal);
+  const plaque=box(lobbyGroup,x,5.05,-9.45,3.8,.55,.16,gold);plaque.material=makePlaque(label);
+  const sub=box(lobbyGroup,x,1.0,-9.34,2.7,.34,.1,dark);sub.material=makePlaque('APPROACH · PRESS VIEW');
+  const lamp=new THREE.PointLight(accent,8,6,2);lamp.position.set(x,3.3,-7.8);lobbyGroup.add(lamp);
+  lobbyDoors.push({who,x,z:-8.4});
+ }
+ // Welcome wall and a low-profile reception island; paths to both doors remain clear.
+ const title=box(lobbyGroup,0,4.25,9.58,7,1.25,.16,dark);title.material=makePlaque('WELCOME TO FRIENDS MUSEUM');
+ box(lobbyGroup,0,.42,1.1,3.6,.72,1.15,dark);box(lobbyGroup,0,.82,.98,3.75,.12,1.25,gold);
+ const deskTop=box(lobbyGroup,0,1.0,.98,3.45,.18,1.02,cream);
+ const deskSign=box(lobbyGroup,0,1.35,.38,2.25,.42,.08,dark);deskSign.material=makePlaque('YOUR STORY STARTS HERE');
+ // Symmetrical columns, wall lights, planters and benches add scale without heavy geometry.
+ for(const x of [-9,9])for(const z of [-6,0,6]){
+  const col=box(lobbyGroup,x,2.45,z,.42,4.9,.42,gold);col.castShadow=false;
+  box(lobbyGroup,x,4.92,z,.72,.18,.72,cream);box(lobbyGroup,x,.12,z,.72,.18,.72,cream);
+ }
+ for(const x of [-10,10])for(const z of [-4,4]){
+  const s=new THREE.Group();s.position.set(x,3.4,z);lobbyGroup.add(s);
+  const back=box(s,0,0,0,.18,.65,.18,gold);back.castShadow=false;
+  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.16,12,10),new THREE.MeshStandardMaterial({color:0xffe3aa,emissive:0xffc36b,emissiveIntensity:1.5}));bulb.position.y=-.42;s.add(bulb);
+  const light=new THREE.PointLight(0xffd18a,7,5,2);light.position.set(x>0?-0.3:.3,-.45,0);s.add(light);
+ }
+ for(const x of [-8.6,8.6])for(const z of [-7,7]){
+  const pot=new THREE.Mesh(new THREE.CylinderGeometry(.28,.22,.48,12),mat(0x49352c,.7));pot.position.set(x,.12,z);lobbyGroup.add(pot);
+  for(let j=0;j<4;j++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.13,.85,7),mat(j%2?0x315b42:0x47734d,.8));leaf.position.set(x+Math.cos(j*Math.PI/2)*.12,.72,z+Math.sin(j*Math.PI/2)*.12);lobbyGroup.add(leaf)}
+ }
+ // Low-poly chandelier and ceiling ribs.
+ const chandelier=new THREE.Group();chandelier.position.set(0,4.5,0);lobbyGroup.add(chandelier);
+ for(const [r,t,y] of [[1.25,.05,0],[.82,.035,-.28],[.42,.025,-.52]]){const ring=new THREE.Mesh(new THREE.TorusGeometry(r,t,8,40),gold);ring.rotation.x=Math.PI/2;ring.position.y=y;chandelier.add(ring)}
+ for(let i=0;i<8;i++){const a=i*Math.PI/4;const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(.12,0),new THREE.MeshStandardMaterial({color:0xffe5b3,emissive:0x8c632a,emissiveIntensity:1,metalness:.2,roughness:.2}));crystal.position.set(Math.cos(a)*1.08,-.32,Math.sin(a)*1.08);chandelier.add(crystal)}
+ const core=new THREE.PointLight(0xffd28a,16,12,2);core.position.y=-.45;chandelier.add(core);
+ for(const z of [-8,-4,0,4,8])box(lobbyGroup,0,5.18,z,20,.08,.12,gold);
+ camera.position.set(0,1.65,6.5);yaw=0;pitch=0;camera.rotation.set(0,0,0);gameMode='lobby';active=true;near=null;
+ $('start').style.display='none';$('lock').style.display='none';$('hud').style.display='flex';$('museumName').textContent='MAIN LOBBY';$('progressWrap').style.display='none';$('hint').style.display='block';$('hint').textContent='Walk to Rado Museum or Arsha Sir Museum and tap VIEW';
+}
 window.startGame=()=>{voicePlayer.pause();buildLobby()};
 function proceduralSurface(base,vein,kind){
  const c=document.createElement('canvas');c.width=512;c.height=512;const g=c.getContext('2d');
