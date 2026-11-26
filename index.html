@@ -165,6 +165,27 @@ function buildLobby(){
  box(lobbyGroup,0,.42,1.1,3.6,.72,1.15,dark);box(lobbyGroup,0,.82,.98,3.75,.12,1.25,gold);
  const deskTop=box(lobbyGroup,0,1.0,.98,3.45,.18,1.02,cream);
  const deskSign=box(lobbyGroup,0,1.35,.38,2.25,.42,.08,dark);deskSign.material=makePlaque('YOUR STORY STARTS HERE');
+ // Large welcome display below the title sign.
+ const welcomeFrame=box(lobbyGroup,0,2.85,9.57,6.2,1.45,.2,gold);
+ const welcomeScreen=box(lobbyGroup,0,2.85,9.43,5.95,1.22,.08,dark);welcomeScreen.material=makePlaque('RADO  ·  ARSHA SIR  ·  FRIENDS FOREVER');
+ // Freestanding visitor information kiosk on the left side of reception.
+ const kiosk=new THREE.Group();kiosk.position.set(-6.6,0,1.6);kiosk.rotation.y=.22;lobbyGroup.add(kiosk);
+ box(kiosk,0,.12,0,1.05,.22,.72,gold);box(kiosk,0,.78,0,.82,1.2,.56,dark);
+ box(kiosk,0,1.5,-.03,1.05,.1,.72,gold);
+ const kioskScreen=box(kiosk,0,1.0,.292,.72,.72,.035,dark);kioskScreen.material=makePlaque('MUSEUM GUIDE');
+ const kioskBase=box(kiosk,0,.24,0,1.25,.16,.85,cream);
+ const kioskLabel=box(kiosk,0,1.72,-.02,1.35,.32,.12,gold);kioskLabel.material=makePlaque('VISITOR INFO');
+ // Short velvet-rope queue markers, leaving a wide open path to each entrance.
+ for(const [cx] of [[-4],[4]]){
+  for(const side of [-1,1]){
+   for(const dx of [1.9,2.65]){
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(.055,.075,.82,10),gold);post.position.set(cx+side*dx,.41,-6.7);lobbyGroup.add(post);
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(.095,10,8),cream);cap.position.set(cx+side*dx,.86,-6.7);lobbyGroup.add(cap);
+   }
+   const ropeCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(cx+side*1.9,.72,-6.7),new THREE.Vector3(cx+side*2.25,.48,-6.7),new THREE.Vector3(cx+side*2.65,.72,-6.7)]);
+   const rope=new THREE.Mesh(new THREE.TubeGeometry(ropeCurve,12,.035,6,false),mat(0x6b2434,.85));lobbyGroup.add(rope);
+  }
+ }
  // Symmetrical columns, wall lights, planters and benches add scale without heavy geometry.
  for(const x of [-9,9])for(const z of [-6,0,6]){
   const col=box(lobbyGroup,x,2.45,z,.42,4.9,.42,gold);col.castShadow=false;
