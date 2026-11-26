@@ -261,7 +261,7 @@ box(frame,0,0,.025,w+.08,h+.08,.06,mat(0x08090d));
 for(const sx of [-1,1])for(const sy of [-1,1]){
  const stud=new THREE.Mesh(new THREE.SphereGeometry(.055,10,8),lightGold);stud.position.set(sx*(w/2+.085),sy*(h/2+.085),.12);frame.add(stud);
 }
-const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));image.position.z=.07;frame.add(image);
+const photoMaterial=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),photoMaterial);image.position.z=.16;image.renderOrder=10;frame.add(image);
 const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;image.userData.voice='assets/voices/'+encodeURIComponent(funnyVoiceFiles[selected][i]);plaque.userData.isExhibit=true;frames.push(image);
 });
 // exit portal sign
