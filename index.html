@@ -382,7 +382,7 @@ const outerFrame=box(frame,0,0,-.045,w+.22,h+.22,.12,darkGold);
 const innerFrame=box(frame,0,0,.015,w+.12,h+.12,.045,trim);
 for(const part of [outerFrame,innerFrame]){part.castShadow=false;part.receiveShadow=false}
 
-const photoMaterial=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),photoMaterial);image.position.z=.075;image.renderOrder=10;image.visible=true;frame.add(image);
+const photoMaterial=new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});const image=new THREE.Mesh(new THREE.PlaneGeometry(w,h),photoMaterial);image.position.z=.16;image.renderOrder=20;image.visible=true;frame.add(image);
 const plaque=box(frame,0,-1.48,.02,2.08,.52,.08,makePlaque(caps[i]));plaque.visible=true;outerFrame.visible=true;innerFrame.visible=true;
 image.userData.caption=caps[i];image.userData.image=imageUrl;image.userData.title=`${selected==='rado'?'Rado':'Arsha Sir'} · Exhibit ${i+1}`;image.userData.voice='assets/voices/'+encodeURIComponent(funnyVoiceFiles[selected][i]);image.userData.frameParts=[outerFrame,innerFrame,plaque];plaque.userData.isExhibit=true;frames.push(image);
 });
